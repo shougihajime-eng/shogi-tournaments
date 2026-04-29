@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { persistAll } from '@/lib/scrapers/persist'
+import { isServiceClientAvailable } from '@/lib/supabase/server'
 import type { ScrapeOutcome } from '@/lib/scrapers/types'
 
 export const dynamic = 'force-dynamic'
@@ -25,6 +26,13 @@ async function handle(req: NextRequest) {
   const auth = req.headers.get('authorization') ?? ''
   if (auth !== `Bearer ${expected}`) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
+
+  if (!isServiceClientAvailable()) {
+    return NextResponse.json(
+      { error: 'SUPABASE_SERVICE_ROLE_KEY missing or malformed' },
+      { status: 503 }
+    )
   }
 
   try {

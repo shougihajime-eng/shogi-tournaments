@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { getServiceClient } from '@/lib/supabase/server'
+import { getServiceClient, isServiceClientAvailable } from '@/lib/supabase/server'
 import { persistAll } from '@/lib/scrapers/persist'
 import type { ScrapeOutcome } from '@/lib/scrapers/types'
 
@@ -21,6 +21,12 @@ async function runScrapers(): Promise<ScrapeOutcome[]> {
 }
 
 export async function POST() {
+  if (!isServiceClientAvailable()) {
+    return NextResponse.json(
+      { error: 'スクレイプ機能は無効化されています（SUPABASE_SERVICE_ROLE_KEY 未設定）' },
+      { status: 503 }
+    )
+  }
   const supabase = getServiceClient()
   const { data: latest, error: latestErr } = await supabase
     .from('scrape_runs')
