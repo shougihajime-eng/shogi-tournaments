@@ -7,11 +7,13 @@ export async function GET() {
     runtime: process.env.NEXT_RUNTIME ?? 'nodejs',
     node_version: process.versions?.node ?? 'unknown',
     env: {
-      has_url: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL),
-      has_anon: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-      has_service: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
-      has_cron: Boolean(process.env.CRON_SECRET),
-      url_prefix: (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').slice(0, 30)
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? null,
+      anon_len: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').length,
+      anon_head: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').slice(0, 12),
+      anon_tail: (process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').slice(-12),
+      anon_has_whitespace: /\s/.test(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''),
+      service_len: (process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').length,
+      cron_len: (process.env.CRON_SECRET ?? '').length
     }
   }
 
