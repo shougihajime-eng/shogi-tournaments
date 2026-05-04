@@ -95,11 +95,7 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
         <p className="mt-3 line-clamp-3 text-sm text-slate-600">{t.description}</p>
       )}
 
-      <div className="mt-auto pt-4">
-        <ReactionButtons tournamentId={t.id} />
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
         {t.application_url ? (
           <a
             href={t.application_url}
@@ -137,6 +133,9 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
             問い合わせ
           </a>
         )}
+        <div className="ml-auto">
+          <ReactionButtons tournamentId={t.id} />
+        </div>
       </div>
     </article>
   )

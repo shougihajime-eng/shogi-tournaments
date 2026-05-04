@@ -3,6 +3,7 @@ import type { Tournament, RegionFilter, ScrapeRun } from '@/lib/types/tournament
 import { TournamentList } from '@/components/TournamentList'
 import { FilterBar } from '@/components/FilterBar'
 import { RefreshButton } from '@/components/RefreshButton'
+import { MyTournamentsSection } from '@/components/MyTournamentsSection'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -83,6 +84,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
           <RefreshButton />
         </div>
       </header>
+
+      <MyTournamentsSection tournaments={tournaments} now={now} />
 
       <div className="mb-6">
         <FilterBar active={filter} />

@@ -1,59 +1,41 @@
 'use client'
 import { useEffect, useState } from 'react'
-
-type Reaction = 'going' | 'interested' | null
-
-const STORAGE_KEY = 'shogi-reactions:v1'
-
-type Store = Record<string, 'going' | 'interested'>
-
-function readStore(): Store {
-  if (typeof window === 'undefined') return {}
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return {}
-    const parsed = JSON.parse(raw) as unknown
-    if (!parsed || typeof parsed !== 'object') return {}
-    const out: Store = {}
-    for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
-      if (v === 'going' || v === 'interested') out[k] = v
-    }
-    return out
-  } catch {
-    return {}
-  }
-}
-
-function writeStore(store: Store): void {
-  if (typeof window === 'undefined') return
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
-  } catch {
-    /* ignore quota / privacy mode */
-  }
-}
+import {
+  type Reaction,
+  REACTION_CHANGED_EVENT,
+  readReactions,
+  setReaction as persistReaction
+} from '@/lib/reactions'
 
 export function ReactionButtons({ tournamentId }: { tournamentId: string }) {
-  const [reaction, setReaction] = useState<Reaction>(null)
+  const [reaction, setLocalReaction] = useState<Reaction | null>(null)
   const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    const store = readStore()
-    const v = store[tournamentId]
-    if (v === 'going' || v === 'interested') setReaction(v)
+    const sync = () => {
+      const store = readReactions()
+      setLocalReaction(store[tournamentId] ?? null)
+    }
+    sync()
     setHydrated(true)
+    window.addEventListener(REACTION_CHANGED_EVENT, sync)
+    window.addEventListener('storage', sync)
+    return () => {
+      window.removeEventListener(REACTION_CHANGED_EVENT, sync)
+      window.removeEventListener('storage', sync)
+    }
   }, [tournamentId])
 
-  const update = (next: Reaction) => {
-    setReaction(next)
-    const store = readStore()
-    if (next) store[tournamentId] = next
-    else delete store[tournamentId]
-    writeStore(store)
+  const onClickGoing = () => {
+    const next: Reaction | null = reaction === 'going' ? null : 'going'
+    setLocalReaction(next)
+    persistReaction(tournamentId, next)
   }
-
-  const onClickGoing = () => update(reaction === 'going' ? null : 'going')
-  const onClickInterested = () => update(reaction === 'interested' ? null : 'interested')
+  const onClickInterested = () => {
+    const next: Reaction | null = reaction === 'interested' ? null : 'interested'
+    setLocalReaction(next)
+    persistReaction(tournamentId, next)
+  }
 
   return (
     <div className="flex flex-wrap gap-2" suppressHydrationWarning>
