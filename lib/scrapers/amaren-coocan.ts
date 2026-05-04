@@ -21,10 +21,14 @@ export function parse(html: string): ScrapedTournament[] {
     const $a = $(a)
     const href = ($a.attr('href') ?? '').trim()
     if (!href) return
+    if (/^(mailto:|tel:|javascript:|#)/i.test(href)) return
     if (/youtube\.com|youtu\.be|asahi\.com|facebook\.com|twitter\.com/i.test(href)) return
 
     const title = $a.text().replace(/\s+/g, ' ').trim()
     if (!title || title.length < 3) return
+    // タイトルがメアド・URL・極端に短い等の場合は大会ではない
+    if (/@|^https?:|^www\./i.test(title)) return
+    if (!/[぀-ヿ一-龯]/.test(title)) return  // 日本語を含まない場合は大会名でない可能性大
 
     // タイトルや周辺テキストに日付が含まれる場合のみ採用
     const $row = $a.closest('tr,td,p,li')
