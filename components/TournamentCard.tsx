@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { Tournament } from '@/lib/types/tournament'
 import { Badge } from '@/components/Badge'
 import { ReactionButtons } from '@/components/ReactionButtons'
@@ -110,9 +111,14 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
           {isDeadlineSoon && <Badge variant="deadline">締切間近</Badge>}
         </div>
 
-        {/* タイトル */}
-        <h3 className="font-serif text-lg font-bold leading-snug text-ink-900 group-hover:text-shogi-800">
-          {t.title}
+        {/* タイトル（詳細ページへのリンク） */}
+        <h3 className="font-serif text-lg font-bold leading-snug text-ink-900">
+          <Link
+            href={`/tournaments/${t.id}`}
+            className="rounded-sm decoration-shogi-300 underline-offset-4 outline-none hover:text-shogi-800 hover:underline focus-visible:ring-2 focus-visible:ring-shogi-700/30"
+          >
+            {t.title}
+          </Link>
         </h3>
 
         {/* 開催日（強調） */}
