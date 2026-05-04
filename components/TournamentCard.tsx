@@ -1,5 +1,6 @@
 import type { Tournament } from '@/lib/types/tournament'
 import { Badge } from '@/components/Badge'
+import { ReactionButtons } from '@/components/ReactionButtons'
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
@@ -94,7 +95,11 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
         <p className="mt-3 line-clamp-3 text-sm text-slate-600">{t.description}</p>
       )}
 
-      <div className="mt-auto flex flex-wrap gap-2 pt-4">
+      <div className="mt-auto pt-4">
+        <ReactionButtons tournamentId={t.id} />
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
         {t.application_url ? (
           <a
             href={t.application_url}
