@@ -40,3 +40,4 @@ export type ScrapeRun = {
 }
 
 export type RegionFilter = 'all' | 'tokyo' | 'kanto'
+export type SortKey = 'date' | 'deadline' | 'newest'

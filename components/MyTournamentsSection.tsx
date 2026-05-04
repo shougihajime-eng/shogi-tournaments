@@ -2,11 +2,12 @@
 import { useEffect, useState } from 'react'
 import type { Tournament } from '@/lib/types/tournament'
 import { TournamentList } from '@/components/TournamentList'
-import { REACTION_CHANGED_EVENT, type ReactionStore, readReactions } from '@/lib/reactions'
+import { REACTION_CHANGED_EVENT, type ReactionStore, readReactions, writeReactions } from '@/lib/reactions'
 
 export function MyTournamentsSection({ tournaments, now }: { tournaments: Tournament[]; now: Date }) {
   const [store, setStore] = useState<ReactionStore>({})
   const [hydrated, setHydrated] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
     const sync = () => setStore(readReactions())
@@ -24,36 +25,76 @@ export function MyTournamentsSection({ tournaments, now }: { tournaments: Tourna
 
   const going = tournaments.filter(t => store[t.id] === 'going')
   const interested = tournaments.filter(t => store[t.id] === 'interested')
-  if (going.length === 0 && interested.length === 0) return null
+  const total = going.length + interested.length
+  if (total === 0) return null
+
+  const clearAll = () => {
+    if (typeof window === 'undefined') return
+    if (!window.confirm('保存した「行く」「気になる」をすべて解除します。よろしいですか？')) return
+    writeReactions({})
+  }
 
   return (
-    <section className="mb-8 rounded-lg border border-slate-300 bg-gradient-to-b from-slate-50 to-white p-4 shadow-sm">
-      <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900">
-        <span>あなたの大会</span>
-        <span className="text-xs font-normal text-slate-500">（このブラウザに保存）</span>
-      </h2>
-
-      {going.length > 0 && (
-        <div className="mb-5">
-          <h3 className="mb-2 flex items-center gap-2 text-sm font-bold text-emerald-700">
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-600 px-1.5 text-xs text-white">
-              ✓
-            </span>
-            行く（{going.length}）
-          </h3>
-          <TournamentList tournaments={going} now={now} />
+    <section
+      aria-label="あなたが選んだ大会"
+      className="mb-8 overflow-hidden rounded-xl border border-shogi-200 bg-gradient-to-br from-shogi-50 via-white to-white shadow-card"
+    >
+      <header className="flex items-center justify-between gap-3 border-b border-shogi-100 bg-white/60 px-5 py-3.5">
+        <div className="flex items-center gap-3">
+          <span aria-hidden className="flex h-8 w-8 items-center justify-center rounded-full bg-shogi-800 font-serif text-sm font-bold text-white">
+            ★
+          </span>
+          <div>
+            <h2 className="font-serif text-lg font-bold text-ink-900">あなたの大会</h2>
+            <p className="text-xs text-ink-500">
+              {total}件保存中・このブラウザに保存
+            </p>
+          </div>
         </div>
-      )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setCollapsed(c => !c)}
+            aria-expanded={!collapsed}
+            className="btn-ghost text-xs"
+          >
+            {collapsed ? '開く' : '閉じる'}
+          </button>
+          <button
+            type="button"
+            onClick={clearAll}
+            className="btn-ghost text-xs text-ink-500 hover:text-deadline-700"
+          >
+            すべて解除
+          </button>
+        </div>
+      </header>
 
-      {interested.length > 0 && (
-        <div>
-          <h3 className="mb-2 flex items-center gap-2 text-sm font-bold text-amber-700">
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-500 px-1.5 text-xs text-white">
-              ★
-            </span>
-            気になる（{interested.length}）
-          </h3>
-          <TournamentList tournaments={interested} now={now} />
+      {!collapsed && (
+        <div className="space-y-6 p-5">
+          {going.length > 0 && (
+            <div>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-going-700">
+                <span aria-hidden className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-going-600 text-xs text-white">
+                  ✓
+                </span>
+                行く（{going.length}）
+              </h3>
+              <TournamentList tournaments={going} now={now} />
+            </div>
+          )}
+
+          {interested.length > 0 && (
+            <div>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-interest-700">
+                <span aria-hidden className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-interest-500 text-xs text-white">
+                  ★
+                </span>
+                気になる（{interested.length}）
+              </h3>
+              <TournamentList tournaments={interested} now={now} />
+            </div>
+          )}
         </div>
       )}
     </section>

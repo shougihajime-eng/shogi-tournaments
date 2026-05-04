@@ -1,21 +1,28 @@
 import type { ReactNode } from 'react'
 
-type Variant = 'tokyo' | 'kanto' | 'new' | 'jsa' | 'amaren' | 'deadline' | 'neutral'
+type Variant =
+  | 'jsa'
+  | 'amaren'
+  | 'tokyo'
+  | 'kanto'
+  | 'new'
+  | 'deadline'
+  | 'going'
+  | 'interest'
+  | 'neutral'
 
 const STYLES: Record<Variant, string> = {
-  tokyo: 'bg-tokyo text-white',
-  kanto: 'bg-kanto text-white',
-  new: 'bg-emerald-600 text-white',
-  jsa: 'bg-slate-800 text-white',
-  amaren: 'bg-indigo-700 text-white',
-  deadline: 'bg-deadline text-white',
-  neutral: 'bg-slate-200 text-slate-700'
+  jsa: 'bg-shogi-50 text-shogi-800 ring-1 ring-inset ring-shogi-200',
+  amaren: 'bg-ink-100 text-ink-800 ring-1 ring-inset ring-ink-300',
+  tokyo: 'bg-tokyo-50 text-tokyo-700 ring-1 ring-inset ring-tokyo-100',
+  kanto: 'bg-kanto-50 text-kanto-700 ring-1 ring-inset ring-kanto-100',
+  new: 'bg-going-600 text-white',
+  deadline: 'bg-deadline-600 text-white',
+  going: 'bg-going-600 text-white',
+  interest: 'bg-interest-100 text-interest-700 ring-1 ring-inset ring-interest-500/40',
+  neutral: 'bg-ink-100 text-ink-700 ring-1 ring-inset ring-ink-200'
 }
 
 export function Badge({ variant, children }: { variant: Variant; children: ReactNode }) {
-  return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${STYLES[variant]}`}>
-      {children}
-    </span>
-  )
+  return <span className={`chip ${STYLES[variant]}`}>{children}</span>
 }

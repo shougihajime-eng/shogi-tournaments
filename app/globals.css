@@ -1,3 +1,95 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'palt';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background: #FAFAF9;
+    color: #1C1917;
+  }
+
+  /* 数値・日付の等幅化（カードの位置揃え用） */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 全要素のフォーカスリングを統一 */
+  :focus-visible {
+    outline: 2px solid #334E68;
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* リンクのデフォルト下線色 */
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 縦スクロールバー（Webkit） */
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #D6D3D1;
+    border: 3px solid #FAFAF9;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #A8A29E;
+  }
+
+  /* 印刷時のレイアウト */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    body {
+      background: white;
+    }
+  }
+}
+
+@layer components {
+  /* 共通カードシェル */
+  .surface {
+    @apply rounded-xl border border-ink-200 bg-white shadow-card transition-shadow duration-200;
+  }
+  .surface-hover {
+    @apply hover:border-ink-300 hover:shadow-card-hover;
+  }
+
+  /* プライマリボタン（申込など主要アクション） */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md bg-shogi-800 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-shogi-900 active:bg-shogi-900 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* セカンダリボタン */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md border border-ink-300 bg-white px-4 py-2.5 text-sm font-semibold text-ink-800 transition-colors hover:bg-ink-50 active:bg-ink-100 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* ゴーストボタン（控えめな操作） */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-100 active:bg-ink-200;
+  }
+
+  /* チップ（バッジ） */
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold tabular-nums;
+  }
+}
