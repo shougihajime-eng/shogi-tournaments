@@ -75,9 +75,43 @@ export default async function TournamentDetail({ params }: { params: Promise<{ i
   const isToday = daysToEvent === 0
   const isDeadlineSoon = daysToDeadline !== null && daysToDeadline >= 0 && daysToDeadline <= 7
 
+  // schema.org Event 構造化データ
+  const jsonLd: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: t.title,
+    ...(t.description ? { description: t.description } : {}),
+    ...(t.event_date_start ? { startDate: t.event_date_start } : {}),
+    ...(t.event_date_end ? { endDate: t.event_date_end } : {}),
+    ...(t.location
+      ? {
+          location: {
+            '@type': 'Place',
+            name: t.location,
+            ...(t.prefecture
+              ? { address: { '@type': 'PostalAddress', addressRegion: t.prefecture, addressCountry: 'JP' } }
+              : {})
+          }
+        }
+      : {}),
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    organizer: {
+      '@type': 'Organization',
+      name: t.source === 'jsa' ? '日本将棋連盟' : '日本アマチュア将棋連盟'
+    },
+    ...(t.application_url || t.detail_url
+      ? { url: t.application_url ?? t.detail_url }
+      : {})
+  }
+
   return (
     <>
       <SkipLink />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <AppHeader lastUpdatedAt={t.last_seen_at} now={now} />
 
       <main id="main" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import type { RegionFilter, SortKey } from '@/lib/types/tournament'
 
 const REGION_OPTIONS: Array<{ key: RegionFilter; label: string; count?: number }> = [
@@ -32,11 +32,26 @@ export function FilterBar({
   const params = useSearchParams()
   const [, startTransition] = useTransition()
   const [localQuery, setLocalQuery] = useState(query)
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   // URLが変化したら入力を同期
   useEffect(() => {
     setLocalQuery(query)
   }, [query])
+
+  // キーボードショートカット: 「/」で検索ボックスへフォーカス
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return
+      const t = e.target as HTMLElement | null
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return
+      e.preventDefault()
+      inputRef.current?.focus()
+      inputRef.current?.select()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
 
   function pushParams(mutate: (next: URLSearchParams) => void) {
     const next = new URLSearchParams(params?.toString() ?? '')
@@ -105,6 +120,7 @@ export function FilterBar({
           <path d="M21 21l-4.3-4.3" />
         </svg>
         <input
+          ref={inputRef}
           type="search"
           inputMode="search"
           enterKeyHint="search"
@@ -114,6 +130,9 @@ export function FilterBar({
           value={localQuery}
           onChange={e => setLocalQuery(e.target.value)}
         />
+        <kbd className="hidden rounded border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-[11px] text-ink-500 sm:inline-block" aria-hidden>
+          /
+        </kbd>
         {localQuery && (
           <button
             type="button"
