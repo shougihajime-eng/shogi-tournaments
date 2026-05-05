@@ -3,9 +3,11 @@ import type { Tournament, RegionFilter, ScrapeRun, SortKey } from '@/lib/types/t
 import { TournamentList } from '@/components/TournamentList'
 import { FilterBar } from '@/components/FilterBar'
 import { MyTournamentsSection } from '@/components/MyTournamentsSection'
+import { OnboardingHint } from '@/components/OnboardingHint'
 import { AppHeader } from '@/components/AppHeader'
 import { StatsBanner } from '@/components/StatsBanner'
 import { AppFooter } from '@/components/AppFooter'
+import { SkipLink } from '@/components/SkipLink'
 import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
@@ -132,12 +134,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
 
   return (
     <>
+      <SkipLink />
       <AppHeader lastUpdatedAt={latestRun?.finished_at ?? null} now={now} />
 
       <StatsBanner tournaments={allTournaments} now={now} />
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <main id="main" className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+        <h1 className="sr-only">将棋大会一覧</h1>
         <Suspense>
+          <OnboardingHint />
           <MyTournamentsSection tournaments={allTournaments} now={now} />
         </Suspense>
 

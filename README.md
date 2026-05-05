@@ -1,0 +1,149 @@
+# 将棋大会ナビ
+
+大人が参加できる将棋大会の情報を、毎日自動で集めて見やすく表示するWebアプリです。
+
+🌐 **公開URL**: https://shogi-tournaments.vercel.app
+
+---
+
+## このアプリでできること
+
+- 日本将棋連盟と日本アマチュア将棋連盟の公式サイトから、毎日自動で大会情報を取得します
+- 子ども・観戦・解説イベントなどは自動で除外されます
+- **東京・関東の大会**を見やすく強調表示します
+- **新着・締切間近**の大会には目立つ目印が付きます
+- 各大会に「**行く**」「**気になる**」をマークでき、画面の一番上に集まります（ブラウザに保存されます）
+- 「**申し込む**」ボタンから公式サイトへ直接アクセスできます
+
+---
+
+## 自動で動く仕組み
+
+| 仕組み | 内容 |
+|---|---|
+| 自動更新 | 毎日 朝6時（日本時間）に最新情報を自動取得 |
+| 公開 | コードを変更すると自動でVercelが本番へ反映 |
+| データ保存 | Supabase（クラウドのデータベース）に保存 |
+
+---
+
+## 何かあったときの確認場所
+
+| 場所 | 用途 |
+|---|---|
+| https://shogi-tournaments.vercel.app | 本番サイト |
+| https://github.com/shougihajime-eng/shogi-tournaments | ソースコード |
+| https://vercel.com/dashboard | デプロイ状況・ログ・環境変数 |
+| https://supabase.com/dashboard | データベース管理画面 |
+
+---
+
+## 画面の見方
+
+### トップページ
+1. **ヘッダー**: タイトル・最終更新時刻・「更新」ボタン
+2. **件数バナー**: 掲載中／東京／関東／今週／締切間近の件数
+3. **あなたの大会**: 行く・気になるをマークした大会（このブラウザに保存）
+4. **検索ボックス**: 大会名・場所で検索
+5. **絞り込みチップ**: すべて／東京／関東を含む
+6. **並び替えメニュー**: 開催日が近い順／締切が近い順／新着順
+7. **大会カード**: 各大会の詳細
+   - 縦に色つきの線が出ているカードは「**本日開催**」または「**締切間近**」
+   - カードのタイトルをクリックすると詳細ページへ
+   - 右下の「行く」「気になる」ボタンで保存
+
+### 大会詳細ページ
+- カードのタイトルをクリックすると、その大会だけの専用ページが開きます
+- URLを共有できるので、他の人に大会を教えるときに便利です
+
+---
+
+## 仕様の決まり事
+
+### 表示される大会
+- 大人が参加できる一般・アマチュア・シニア・支部・段級位の大会
+- 開催日が今日以降（過ぎた大会は自動で隠れます）
+
+### 表示されない大会（自動除外）
+- 子ども関連: 小学生／中学生／高校生／小中学生／学生／児童／子ども／こども／キッズ／青少年／小学校／中学校／高校
+- イベント系: 親子／観戦／大盤解説／解説会／指導対局／前夜祭／ツアー
+
+### 強調表示
+- **NEW**: 新しく追加されてから 7日以内
+- **締切間近**: 申込締切まで 7日以内（赤い枠）
+- **東京/関東**: 色つきバッジ ＋ 上部の専用セクション
+- **本日**: 開催日が今日のとき、青い縦線
+
+---
+
+## 自分でできるカスタマイズ
+
+### 「行く」「気になる」を全部消したいとき
+1. トップページ上部の「あなたの大会」セクションの右上「**すべて解除**」を押す
+
+### 表示したい／したくない大会を変えるとき
+（要：エンジニアにお願い）
+- 除外キーワードの追加・変更: `lib/filters/exclusion.ts` を編集
+- 強調表示のルール変更: `lib/normalizers/region.ts` や各カードファイル
+
+---
+
+## 今後の課題（オーナーの作業が必要なもの）
+
+### ⚠️ 自動更新を完全に有効化する
+
+現在、`SUPABASE_SERVICE_ROLE_KEY` という鍵がVercel側に未設定のため、**毎朝6時の自動更新と「更新」ボタンが動きません**（既存データは表示されます）。
+
+**対処方法**（2分）:
+1. https://vercel.com/dashboard を開く
+2. `shogi-tournaments` プロジェクト → **Settings** → **Environment Variables**
+3. `SUPABASE_SERVICE_ROLE_KEY` を **Add New**
+4. **Value** に以下を貼り付け：
+   ```
+   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxa2Fhb2hkYnFlZnVzenh3cXpyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzQ0ODg2NywiZXhwIjoyMDkzMDI0ODY3fQ.ucqJdhoFlnD-PiJmX46Gv3EWLQD3GFwE9O0mv1mQ7G0
+   ```
+5. **Environment** は Production / Preview / Development すべてチェック
+6. **Save** を押す
+7. **Deployments** タブ → 最新の `⋯` → **Redeploy**
+
+これで翌朝6時に自動更新が走るようになります。
+
+---
+
+## 開発者向け情報
+
+### 技術スタック
+- Next.js 15 (App Router) + TypeScript + Tailwind CSS
+- Supabase (Postgres + Row Level Security)
+- Vercel Hosting + Vercel Cron
+- Vitest（自動テスト 50ケース）
+
+### ローカル開発
+```bash
+npm install
+npm run dev          # 開発サーバ http://localhost:3000
+npm run typecheck    # 型チェック
+npm run test         # ユニットテスト
+npm run build        # 本番ビルド
+```
+
+### 環境変数（`.env.local`）
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`（書き込み用、サーバ側のみ）
+- `CRON_SECRET`（Vercel Cron 認証用）
+
+### スクレイパー再実行（手動）
+```bash
+npx tsx tools/scrape-and-persist.ts
+```
+
+### デプロイ
+コードをmainブランチにpushすると自動でVercelに反映されます。
+
+---
+
+## ライセンス・注意事項
+
+- 掲載情報は各公式ページから取得しています。最新の正確な情報は必ず公式ページでご確認ください。
+- スクレイピングは1日1回（朝6時）の最小限です。

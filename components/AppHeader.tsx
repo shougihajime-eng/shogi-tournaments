@@ -28,12 +28,12 @@ export function AppHeader({ lastUpdatedAt, now }: { lastUpdatedAt: string | null
             王
           </span>
           <div className="leading-tight">
-            <h1 className="font-serif text-xl font-bold text-ink-900 sm:text-2xl">
+            <span className="block font-serif text-xl font-bold text-ink-900 sm:text-2xl">
               将棋大会ナビ
-            </h1>
-            <p className="text-xs text-ink-500 sm:text-sm">
+            </span>
+            <span className="block text-xs text-ink-500 sm:text-sm">
               大人のための大会情報を毎日自動収集
-            </p>
+            </span>
           </div>
         </Link>
 

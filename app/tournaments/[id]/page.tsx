@@ -7,6 +7,7 @@ import { Badge } from '@/components/Badge'
 import { ReactionButtons } from '@/components/ReactionButtons'
 import { AppHeader } from '@/components/AppHeader'
 import { AppFooter } from '@/components/AppFooter'
+import { SkipLink } from '@/components/SkipLink'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -76,9 +77,10 @@ export default async function TournamentDetail({ params }: { params: Promise<{ i
 
   return (
     <>
+      <SkipLink />
       <AppHeader lastUpdatedAt={t.last_seen_at} now={now} />
 
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+      <main id="main" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <Link
           href="/"
           className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-shogi-700 hover:text-shogi-900 hover:underline"
