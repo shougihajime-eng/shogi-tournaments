@@ -98,12 +98,12 @@
 
   /* プライマリボタン（申込など主要アクション） */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-md bg-shogi-800 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-shogi-900 active:bg-shogi-900 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-shogi-800 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-shogi-900 active:bg-shogi-900 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   /* セカンダリボタン */
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-1.5 rounded-md border border-ink-300 bg-white px-4 py-2.5 text-sm font-semibold text-ink-800 transition-colors hover:bg-ink-50 active:bg-ink-100 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-ink-300 bg-white px-4 py-2.5 text-sm font-semibold text-ink-800 transition-colors hover:bg-ink-50 active:bg-ink-100 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   /* ゴーストボタン（控えめな操作） */

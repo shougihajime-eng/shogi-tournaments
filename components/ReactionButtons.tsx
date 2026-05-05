@@ -46,9 +46,10 @@ export function ReactionButtons({
   const goingActive = hydrated && reaction === 'going'
   const interestActive = hydrated && reaction === 'interested'
 
+  // 画面幅にかかわらずタップしやすいサイズ（モバイル44px以上推奨）
   const sizeClasses = compact
-    ? 'px-2.5 py-1.5 text-xs'
-    : 'px-3 py-2 text-sm'
+    ? 'px-3 py-2 text-xs sm:px-2.5 sm:py-1.5'
+    : 'px-4 py-2.5 text-sm'
 
   return (
     <div className="flex items-center gap-1.5" suppressHydrationWarning>
