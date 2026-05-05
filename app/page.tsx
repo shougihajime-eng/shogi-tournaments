@@ -8,6 +8,7 @@ import { AppHeader } from '@/components/AppHeader'
 import { StatsBanner } from '@/components/StatsBanner'
 import { AppFooter } from '@/components/AppFooter'
 import { SkipLink } from '@/components/SkipLink'
+import { BackToTopButton } from '@/components/BackToTopButton'
 import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
@@ -129,6 +130,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
   const sorted = applySort(regioned, sort)
 
   const isSearching = Boolean(query.trim())
+  const groupByMonth = sort === 'date' && !isSearching
   const featured = !isSearching && region === 'all' ? sorted.filter(t => t.region === 'tokyo' || t.region === 'kanto') : []
   const others = !isSearching && region === 'all' ? sorted.filter(t => t.region !== 'tokyo' && t.region !== 'kanto') : []
 
@@ -176,6 +178,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                 now={now}
                 emptyMessage="今は東京・関東の公開中の大会はありません"
                 emptyHint="数日後に再度ご確認ください"
+                groupByMonth={groupByMonth}
               />
             </section>
             <section>
@@ -187,6 +190,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                 tournaments={others}
                 now={now}
                 emptyMessage="ほかの地域の大会はありません"
+                groupByMonth={groupByMonth}
               />
             </section>
           </>
@@ -202,12 +206,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
               now={now}
               emptyMessage={region === 'tokyo' ? '今は東京の大会はありません' : '今は関東の大会はありません'}
               emptyHint="数日後に再度ご確認ください"
+              groupByMonth={groupByMonth}
             />
           </section>
         )}
       </main>
 
       <AppFooter lastUpdatedAt={latestRun?.finished_at ?? null} />
+      <BackToTopButton />
     </>
   )
 }
