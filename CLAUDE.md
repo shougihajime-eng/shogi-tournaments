@@ -3,10 +3,12 @@
 大人が参加できる将棋大会情報を、日本将棋連盟（JSA）と日本アマチュア将棋連盟（アマレン）の公式サイトから自動収集して表示する Web アプリ。
 
 ## ステータス
-- フェーズ: 設計（スキーマレビュー待ち）
-- リポジトリ: 未 git init
-- Supabase: 新規プロジェクト作成予定（ユーザー側で実施）
-- デプロイ先: Vercel + Vercel Cron（24h）
+- フェーズ: 本番稼働中
+- 本番URL: https://shogi-tournaments.vercel.app
+- リポジトリ: https://github.com/shougihajime-eng/shogi-tournaments
+- Vercel ダッシュボード: https://vercel.com/dashboard （プロジェクト名 `shogi-tournaments`）
+- Supabase ダッシュボード: https://supabase.com/dashboard
+- 自動更新: Vercel Cron で毎日 06:00 JST（`vercel.json` の `0 21 * * *` UTC）
 
 ## 技術スタック
 - Next.js 14+ (App Router) / TypeScript
