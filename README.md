@@ -112,28 +112,6 @@
 
 ---
 
-## 今後の課題（オーナーの作業が必要なもの）
-
-### ⚠️ 自動更新を完全に有効化する
-
-現在、`SUPABASE_SERVICE_ROLE_KEY` という鍵がVercel側に未設定のため、**毎朝6時の自動更新と「更新」ボタンが動きません**（既存データは表示されます）。
-
-**対処方法**（2分）:
-1. https://vercel.com/dashboard を開く
-2. `shogi-tournaments` プロジェクト → **Settings** → **Environment Variables**
-3. `SUPABASE_SERVICE_ROLE_KEY` を **Add New**
-4. **Value** に以下を貼り付け：
-   ```
-   eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVxa2Fhb2hkYnFlZnVzenh3cXpyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzQ0ODg2NywiZXhwIjoyMDkzMDI0ODY3fQ.ucqJdhoFlnD-PiJmX46Gv3EWLQD3GFwE9O0mv1mQ7G0
-   ```
-5. **Environment** は Production / Preview / Development すべてチェック
-6. **Save** を押す
-7. **Deployments** タブ → 最新の `⋯` → **Redeploy**
-
-これで翌朝6時に自動更新が走るようになります。
-
----
-
 ## 開発者向け情報
 
 ### 技術スタック
