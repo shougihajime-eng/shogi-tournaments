@@ -7,6 +7,7 @@ type PrizeRule = {
 
 const PRIZE_RULES: PrizeRule[] = [
   { pattern: /アマチュア竜王戦|アマ竜王戦|アマ竜王/, label: '優勝50万円' },
+  { pattern: /茨城新聞社杯/, label: '賞金あり' },
   { pattern: /FUYOU杯|ふようはい|フヨウ杯|茨城.*最強戦/, label: '優勝10万円' },
   { pattern: /全日本アマチュア(将棋)?名人戦|全日本アマ(チュア)?名人戦|アマ名人戦/, label: '賞金あり' },
   { pattern: /朝日アマチュア(将棋)?名人戦|朝日アマ(名人)?/, label: '賞金あり' },

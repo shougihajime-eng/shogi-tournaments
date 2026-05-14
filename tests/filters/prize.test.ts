@@ -36,6 +36,11 @@ describe('evaluatePrize', () => {
     expect(r.label).toBe('賞金20万円')
   })
 
+  it('茨城新聞社杯を賞金大会として検出', () => {
+    const r = evaluatePrize({ title: '第45回 茨城新聞社杯争奪将棋大会 鹿行予選', description: null })
+    expect(r.isPrize).toBe(true)
+  })
+
   it('普通の地域大会は賞金大会と判定しない', () => {
     const r = evaluatePrize({ title: '第10回 町道場親睦将棋大会', description: '参加賞あり' })
     expect(r.isPrize).toBe(false)
