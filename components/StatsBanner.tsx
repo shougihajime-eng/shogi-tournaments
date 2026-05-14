@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Tournament } from '@/lib/types/tournament'
+import { isPrizeTournament } from '@/lib/filters/prize'
 
 function within(iso: string | null, now: Date, days: number): boolean {
   if (!iso) return false
@@ -20,6 +21,7 @@ export function StatsBanner({ tournaments, now }: { tournaments: Tournament[]; n
   const total = tournaments.length
   const tokyoCount = tournaments.filter(t => t.region === 'tokyo').length
   const kantoCount = tournaments.filter(t => t.region === 'kanto').length
+  const prizeCount = tournaments.filter(t => isPrizeTournament(t)).length
   const thisWeek = tournaments.filter(t => within(t.event_date_start, now, 7)).length
   const deadlineSoon = tournaments.filter(t => within(t.application_deadline, now, 7)).length
 
@@ -27,6 +29,7 @@ export function StatsBanner({ tournaments, now }: { tournaments: Tournament[]; n
     { label: '掲載中', value: total, accent: 'text-ink-900', href: '/' },
     { label: '東京', value: tokyoCount, accent: 'text-tokyo-600', href: '/?region=tokyo' },
     { label: '関東', value: kantoCount, accent: 'text-kanto-600', href: '/?region=kanto' },
+    { label: '💰賞金大会', value: prizeCount, accent: 'text-amber-700', href: '/?prize=1' },
     { label: '今週', value: thisWeek, accent: 'text-shogi-700', href: null },
     { label: '締切間近', value: deadlineSoon, accent: 'text-deadline-600', href: null }
   ]
@@ -34,7 +37,7 @@ export function StatsBanner({ tournaments, now }: { tournaments: Tournament[]; n
   return (
     <section aria-label="掲載中の大会の概況" className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
       <div className="surface overflow-hidden">
-        <dl className="grid grid-cols-2 divide-y divide-ink-200 sm:grid-cols-5 sm:divide-y-0 sm:divide-x">
+        <dl className="grid grid-cols-2 divide-y divide-ink-200 sm:grid-cols-6 sm:divide-y-0 sm:divide-x">
           {stats.map((s, idx) => {
             const inner = (
               <>

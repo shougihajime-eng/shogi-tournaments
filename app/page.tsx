@@ -9,12 +9,13 @@ import { StatsBanner } from '@/components/StatsBanner'
 import { AppFooter } from '@/components/AppFooter'
 import { SkipLink } from '@/components/SkipLink'
 import { BackToTopButton } from '@/components/BackToTopButton'
+import { isPrizeTournament } from '@/lib/filters/prize'
 import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-type SearchParams = { region?: string; sort?: string; q?: string }
+type SearchParams = { region?: string; sort?: string; q?: string; prize?: string }
 
 function normalizeRegion(input: string | undefined): RegionFilter {
   if (input === 'tokyo' || input === 'kanto') return input
@@ -115,6 +116,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
   const region = normalizeRegion(params.region)
   const sort = normalizeSort(params.sort)
   const query = escapeIlike((params.q ?? '').toString())
+  const prizeOnly = params.prize === '1'
 
   const [allTournaments, latestRun] = await Promise.all([loadTournaments(), loadLatestRun()])
   const now = new Date()
@@ -127,12 +129,21 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
 
   const searched = applySearch(allTournaments, query)
   const regioned = applyRegion(searched, region)
-  const sorted = applySort(regioned, sort)
+  const prizeFiltered = prizeOnly ? regioned.filter(t => isPrizeTournament(t)) : regioned
+  const sorted = applySort(prizeFiltered, sort)
 
   const isSearching = Boolean(query.trim())
-  const groupByMonth = sort === 'date' && !isSearching
-  const featured = !isSearching && region === 'all' ? sorted.filter(t => t.region === 'tokyo' || t.region === 'kanto') : []
-  const others = !isSearching && region === 'all' ? sorted.filter(t => t.region !== 'tokyo' && t.region !== 'kanto') : []
+  const groupByMonth = sort === 'date' && !isSearching && !prizeOnly
+  const prizeTournaments = !isSearching && !prizeOnly && region === 'all'
+    ? sorted.filter(t => isPrizeTournament(t))
+    : []
+  const prizeIds = new Set(prizeTournaments.map(t => t.id))
+  const featured = !isSearching && !prizeOnly && region === 'all'
+    ? sorted.filter(t => !prizeIds.has(t.id) && (t.region === 'tokyo' || t.region === 'kanto'))
+    : []
+  const others = !isSearching && !prizeOnly && region === 'all'
+    ? sorted.filter(t => !prizeIds.has(t.id) && t.region !== 'tokyo' && t.region !== 'kanto')
+    : []
 
   return (
     <>
@@ -165,8 +176,36 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
               emptyHint="別のキーワードや、検索ボックスをクリアして全件表示してみてください"
             />
           </section>
+        ) : prizeOnly ? (
+          <section>
+            <SectionHeading
+              title="💰 賞金が出る大会"
+              caption={`${sorted.length}件`}
+              accent="prize"
+            />
+            <TournamentList
+              tournaments={sorted}
+              now={now}
+              emptyMessage="今は賞金大会の掲載がありません"
+              emptyHint="アマ竜王戦・都名人戦などは年に1度の開催です。トップに戻って通常の一覧をご覧ください"
+            />
+          </section>
         ) : region === 'all' ? (
           <>
+            {prizeTournaments.length > 0 && (
+              <section className="mb-10">
+                <SectionHeading
+                  title="💰 賞金が出る大会"
+                  caption={`${prizeTournaments.length}件`}
+                  accent="prize"
+                />
+                <TournamentList
+                  tournaments={prizeTournaments}
+                  now={now}
+                  emptyMessage="今は賞金大会の掲載がありません"
+                />
+              </section>
+            )}
             <section className="mb-10">
               <SectionHeading
                 title="東京・関東で開かれる大会"
@@ -225,14 +264,16 @@ function SectionHeading({
 }: {
   title: string
   caption?: string
-  accent?: 'tokyo' | 'kanto'
+  accent?: 'tokyo' | 'kanto' | 'prize'
 }) {
   const accentClass =
     accent === 'tokyo'
       ? 'before:bg-tokyo-600'
       : accent === 'kanto'
         ? 'before:bg-kanto-600'
-        : 'before:bg-shogi-700'
+        : accent === 'prize'
+          ? 'before:bg-amber-500'
+          : 'before:bg-shogi-700'
   return (
     <div className="mb-4 flex items-end justify-between gap-3">
       <h2

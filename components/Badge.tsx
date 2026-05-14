@@ -10,6 +10,7 @@ type Variant =
   | 'going'
   | 'interest'
   | 'neutral'
+  | 'prize'
 
 const STYLES: Record<Variant, string> = {
   jsa: 'bg-shogi-50 text-shogi-800 ring-1 ring-inset ring-shogi-200',
@@ -20,7 +21,8 @@ const STYLES: Record<Variant, string> = {
   deadline: 'bg-deadline-600 text-white',
   going: 'bg-going-600 text-white',
   interest: 'bg-interest-100 text-interest-700 ring-1 ring-inset ring-interest-500/40',
-  neutral: 'bg-ink-100 text-ink-700 ring-1 ring-inset ring-ink-200'
+  neutral: 'bg-ink-100 text-ink-700 ring-1 ring-inset ring-ink-200',
+  prize: 'bg-amber-100 text-amber-900 ring-1 ring-inset ring-amber-300'
 }
 
 export function Badge({ variant, children }: { variant: Variant; children: ReactNode }) {
