@@ -16,6 +16,7 @@ type StatItem = {
   value: number
   accent: string
   href: string | null
+  glow?: string
 }
 
 export function StatsBanner({ tournaments, now }: { tournaments: Tournament[]; now: Date }) {
@@ -30,14 +31,15 @@ export function StatsBanner({ tournaments, now }: { tournaments: Tournament[]; n
     { label: '掲載中', value: total, accent: 'text-ink-900', href: '/' },
     { label: '東京', value: tokyoCount, accent: 'text-tokyo-600', href: '/?region=tokyo' },
     { label: '関東', value: kantoCount, accent: 'text-kanto-600', href: '/?region=kanto' },
-    { label: '👑主要大会', value: featuredCount, accent: 'text-fuchsia-700', href: '/?featured=1' },
-    { label: '💰賞金大会', value: prizeCount, accent: 'text-amber-700', href: '/?prize=1' },
-    { label: '⏰締切間近', value: deadlineSoon, accent: 'text-deadline-600', href: '/?deadline=1' }
+    { label: '👑主要大会', value: featuredCount, accent: 'text-murasaki-600', href: '/?featured=1', glow: 'hover:bg-murasaki-50' },
+    { label: '💰賞金大会', value: prizeCount, accent: 'text-kin-600', href: '/?prize=1', glow: 'hover:bg-koma-50' },
+    { label: '⏰締切間近', value: deadlineSoon, accent: 'text-deadline-600', href: '/?deadline=1', glow: 'hover:bg-deadline-50' }
   ]
 
   return (
     <section aria-label="掲載中の大会の概況" className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-      <div className="surface overflow-hidden">
+      <div className="relative overflow-hidden rounded-2xl border border-ink-200 bg-white shadow-elevated">
+        <div aria-hidden className="absolute inset-x-0 top-0 h-1 bg-gold-line" />
         <dl className="grid grid-cols-2 divide-y divide-ink-200 sm:grid-cols-6 sm:divide-y-0 sm:divide-x">
           {stats.map((s, idx) => {
             const inner = (
@@ -51,11 +53,12 @@ export function StatsBanner({ tournaments, now }: { tournaments: Tournament[]; n
             )
             const cls = `flex flex-col items-center gap-1 px-3 py-4 sm:py-5 ${idx === 0 && stats.length % 2 !== 0 ? 'col-span-2 sm:col-span-1' : ''}`
             if (s.href) {
+              const hoverCls = s.glow ?? 'hover:bg-ink-50'
               return (
                 <Link
                   key={s.label}
                   href={s.href}
-                  className={`${cls} transition-colors hover:bg-ink-50`}
+                  className={`${cls} transition-colors ${hoverCls}`}
                   aria-label={`${s.label}で絞り込む（${s.value}件）`}
                 >
                   {inner}

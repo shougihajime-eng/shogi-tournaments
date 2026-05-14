@@ -24,7 +24,7 @@ const STYLES: Record<Variant, string> = {
   interest: 'bg-interest-100 text-interest-700 ring-1 ring-inset ring-interest-500/40',
   neutral: 'bg-ink-100 text-ink-700 ring-1 ring-inset ring-ink-200',
   prize: 'bg-amber-100 text-amber-900 ring-1 ring-inset ring-amber-300',
-  featured: 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-sm'
+  featured: 'bg-gradient-to-r from-murasaki-600 to-murasaki-500 text-white shadow-sm'
 }
 
 export function Badge({ variant, children }: { variant: Variant; children: ReactNode }) {

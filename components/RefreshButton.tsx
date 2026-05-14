@@ -49,7 +49,7 @@ export function RefreshButton() {
         onClick={onClick}
         disabled={busy}
         aria-label={busy ? '更新中' : '最新情報を取得'}
-        className="btn-secondary disabled:cursor-progress"
+        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-koma-300/50 bg-white/10 px-4 py-2.5 text-sm font-semibold text-koma-100 backdrop-blur transition-colors hover:bg-white/20 hover:text-white active:bg-white/25 disabled:cursor-progress disabled:opacity-60"
       >
         <svg
           aria-hidden

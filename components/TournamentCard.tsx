@@ -84,24 +84,36 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
   const prize = evaluatePrize(t)
   const featured = evaluateFeatured(t)
 
+  const baseFrame = featured.isFeatured
+    ? 'featured-frame border-murasaki-200 shadow-glow-featured'
+    : prize.isPrize
+      ? 'prize-frame border-kin-400/50 shadow-glow-prize'
+      : isToday
+        ? 'border-shogi-700 ring-2 ring-shogi-700/15 bg-white'
+        : isDeadlineSoon
+          ? 'border-deadline-500 ring-2 ring-deadline-500/20 bg-white'
+          : 'border-ink-200 bg-white'
+
   return (
     <article
       className={
-        'group relative flex h-full flex-col overflow-hidden rounded-xl border bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover ' +
-        (isToday
-          ? 'border-shogi-700 ring-2 ring-shogi-700/15'
-          : isDeadlineSoon
-            ? 'border-deadline-500 ring-2 ring-deadline-500/20'
-            : 'border-ink-200')
+        'group relative flex h-full flex-col overflow-hidden rounded-xl border shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover ' +
+        baseFrame
       }
     >
       {/* 縦アクセントバー */}
-      {(isToday || isDeadlineSoon) && (
+      {(featured.isFeatured || prize.isPrize || isToday || isDeadlineSoon) && (
         <div
           aria-hidden
           className={
             'absolute left-0 top-0 h-full w-1 ' +
-            (isToday ? 'bg-shogi-700' : 'bg-deadline-500')
+            (featured.isFeatured
+              ? 'bg-gradient-to-b from-murasaki-600 to-murasaki-500'
+              : prize.isPrize
+                ? 'bg-gradient-to-b from-kin-500 to-kin-400'
+                : isToday
+                  ? 'bg-shogi-700'
+                  : 'bg-deadline-500')
           }
         />
       )}

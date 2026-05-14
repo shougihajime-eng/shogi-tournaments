@@ -55,7 +55,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ja" className={`${sans.variable} ${serif.variable}`}>
-      <body className="min-h-screen bg-ink-50 font-sans text-ink-900 antialiased">
+      <body className="min-h-screen font-sans text-ink-900 antialiased">
         {children}
       </body>
     </html>

@@ -15,28 +15,48 @@
   }
 
   body {
-    background: #FAFAF9;
     color: #1C1917;
+    background-color: #FAF6EE;
+    background-image:
+      radial-gradient(at 20% 0%, rgba(123, 63, 168, 0.06) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, rgba(16, 42, 67, 0.07) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(201, 154, 58, 0.06) 0px, transparent 50%),
+      linear-gradient(180deg, #FFFBF0 0%, #FAF6EE 30%, #F5F0E4 100%);
+    background-attachment: fixed;
   }
 
-  /* 数値・日付の等幅化（カードの位置揃え用） */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(to right, rgba(16, 42, 67, 0.025) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(16, 42, 67, 0.025) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  /* main コンテンツが背景パターンの上に乗る */
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
+
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
 
-  /* 全要素のフォーカスリングを統一 */
   :focus-visible {
     outline: 2px solid #334E68;
     outline-offset: 2px;
     border-radius: 6px;
   }
 
-  /* リンクのデフォルト下線色 */
   a {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* 縦スクロールバー（Webkit） */
   ::-webkit-scrollbar {
     width: 12px;
     height: 12px;
@@ -46,21 +66,24 @@
   }
   ::-webkit-scrollbar-thumb {
     background: #D6D3D1;
-    border: 3px solid #FAFAF9;
+    border: 3px solid #FAF6EE;
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #A8A29E;
   }
 
-  /* 印刷時のレイアウト */
   @media print {
-    .no-print {
-      display: none !important;
-    }
     body {
       background: white;
+      background-image: none;
       font-size: 11pt;
+    }
+    body::before {
+      display: none;
+    }
+    .no-print {
+      display: none !important;
     }
     a {
       color: inherit;
@@ -96,7 +119,7 @@
     @apply hover:border-ink-300 hover:shadow-card-hover;
   }
 
-  /* プライマリボタン（申込など主要アクション） */
+  /* プライマリボタン */
   .btn-primary {
     @apply inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-shogi-800 px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-shogi-900 active:bg-shogi-900 disabled:cursor-not-allowed disabled:opacity-50;
   }
@@ -106,7 +129,7 @@
     @apply inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-ink-300 bg-white px-4 py-2.5 text-sm font-semibold text-ink-800 transition-colors hover:bg-ink-50 active:bg-ink-100 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* ゴーストボタン（控えめな操作） */
+  /* ゴーストボタン */
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold text-ink-700 transition-colors hover:bg-ink-100 active:bg-ink-200;
   }
@@ -114,5 +137,27 @@
   /* チップ（バッジ） */
   .chip {
     @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold tabular-nums;
+  }
+
+  /* 主要大会セクション用：紫グラデの装飾枠 */
+  .featured-frame {
+    background:
+      linear-gradient(135deg, rgba(123, 63, 168, 0.08) 0%, rgba(232, 121, 249, 0.04) 100%),
+      #ffffff;
+    border-color: rgba(123, 63, 168, 0.25);
+  }
+
+  /* 賞金大会セクション用：金色の装飾枠 */
+  .prize-frame {
+    background:
+      linear-gradient(135deg, rgba(201, 154, 58, 0.10) 0%, rgba(245, 222, 179, 0.06) 100%),
+      #ffffff;
+    border-color: rgba(201, 154, 58, 0.30);
+  }
+
+  /* 金色のシマー線（装飾用） */
+  .gold-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(201, 154, 58, 0.4) 30%, rgba(224, 179, 84, 0.7) 50%, rgba(201, 154, 58, 0.4) 70%, transparent 100%);
   }
 }
