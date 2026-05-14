@@ -1,4 +1,4 @@
-export type Source = 'jsa' | 'amaren'
+export type Source = 'jsa' | 'amaren' | 'sho-shogi'
 
 export type ScrapedTournament = {
   source: Source

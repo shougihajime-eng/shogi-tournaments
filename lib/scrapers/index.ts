@@ -4,13 +4,15 @@ import * as jsaInfo from './jsa-info'
 import * as jsaTournament from './jsa-tournament'
 import * as amarenCoocan from './amaren-coocan'
 import * as amarenRsys from './amaren-rsys'
+import * as shoShogi from './sho-shogi'
 
 export const SCRAPERS = [
   { id: 'jsa-event', source: 'jsa' as const, scrape: jsaEvent.scrape },
   { id: 'jsa-info', source: 'jsa' as const, scrape: jsaInfo.scrape },
   { id: 'jsa-tournament', source: 'jsa' as const, scrape: jsaTournament.scrape },
   { id: 'amaren-coocan', source: 'amaren' as const, scrape: amarenCoocan.scrape },
-  { id: 'amaren-rsys', source: 'amaren' as const, scrape: amarenRsys.scrape }
+  { id: 'amaren-rsys', source: 'amaren' as const, scrape: amarenRsys.scrape },
+  { id: 'sho-shogi', source: 'sho-shogi' as const, scrape: shoShogi.scrape }
 ]
 
 export async function scrapeAll(): Promise<ScrapeOutcome[]> {

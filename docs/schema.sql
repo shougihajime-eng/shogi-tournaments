@@ -14,7 +14,7 @@ create table public.tournaments (
   id uuid primary key default gen_random_uuid(),
 
   -- ソース情報
-  source        text not null check (source in ('jsa', 'amaren')),
+  source        text not null check (source in ('jsa', 'amaren', 'sho-shogi')),
   source_url    text not null,                        -- 取得元の一覧/詳細URL
   external_id   text not null,                        -- ソース内の安定ID（hashでも可）
 

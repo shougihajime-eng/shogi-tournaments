@@ -1,6 +1,6 @@
 export type Tournament = {
   id: string
-  source: 'jsa' | 'amaren'
+  source: 'jsa' | 'amaren' | 'sho-shogi'
   source_url: string
   external_id: string
   title: string

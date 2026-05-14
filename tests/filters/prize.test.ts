@@ -20,14 +20,14 @@ describe('evaluatePrize', () => {
     expect(r.label).toBe('優勝10万円')
   })
 
-  it('全日本アマ名人戦を賞金大会として検出', () => {
+  it('全日本アマ名人戦は賞金大会としては判定しない（主要大会扱い）', () => {
     const r = evaluatePrize({ title: '第79回全日本アマチュア将棋名人戦 県予選', description: null })
-    expect(r.isPrize).toBe(true)
+    expect(r.isPrize).toBe(false)
   })
 
-  it('朝日アマを賞金大会として検出', () => {
+  it('朝日アマも賞金大会としては判定しない（主要大会扱い）', () => {
     const r = evaluatePrize({ title: '第48回 朝日アマチュア将棋名人戦 都道府県予選', description: null })
-    expect(r.isPrize).toBe(true)
+    expect(r.isPrize).toBe(false)
   })
 
   it('説明文中の「賞金20万円」を抽出', () => {

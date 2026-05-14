@@ -10,12 +10,15 @@ import { AppFooter } from '@/components/AppFooter'
 import { SkipLink } from '@/components/SkipLink'
 import { BackToTopButton } from '@/components/BackToTopButton'
 import { isPrizeTournament } from '@/lib/filters/prize'
+import { isFeaturedTournament } from '@/lib/filters/featured'
 import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-type SearchParams = { region?: string; sort?: string; q?: string; prize?: string }
+type SearchParams = { region?: string; sort?: string; q?: string; prize?: string; featured?: string; deadline?: string }
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000
 
 function normalizeRegion(input: string | undefined): RegionFilter {
   if (input === 'tokyo' || input === 'kanto') return input
@@ -28,8 +31,15 @@ function normalizeSort(input: string | undefined): SortKey {
 }
 
 function escapeIlike(s: string): string {
-  // PostgREST の ilike では % と , を予約。 % はワイルドカードとして使うので , を URL-safe にする
   return s.replace(/[%]/g, '').replace(/,/g, ' ').slice(0, 80)
+}
+
+function isDeadlineSoon(t: Tournament, now: Date): boolean {
+  if (!t.application_deadline) return false
+  const ts = Date.parse(t.application_deadline)
+  if (Number.isNaN(ts)) return false
+  const diff = (ts - now.getTime()) / MS_PER_DAY
+  return diff >= 0 && diff <= 7
 }
 
 async function loadTournaments(): Promise<Tournament[]> {
@@ -117,6 +127,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
   const sort = normalizeSort(params.sort)
   const query = escapeIlike((params.q ?? '').toString())
   const prizeOnly = params.prize === '1'
+  const featuredOnly = params.featured === '1'
+  const deadlineOnly = params.deadline === '1'
 
   const [allTournaments, latestRun] = await Promise.all([loadTournaments(), loadLatestRun()])
   const now = new Date()
@@ -130,19 +142,33 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
   const searched = applySearch(allTournaments, query)
   const regioned = applyRegion(searched, region)
   const prizeFiltered = prizeOnly ? regioned.filter(t => isPrizeTournament(t)) : regioned
-  const sorted = applySort(prizeFiltered, sort)
+  const featuredFiltered = featuredOnly ? prizeFiltered.filter(t => isFeaturedTournament(t)) : prizeFiltered
+  const deadlineFiltered = deadlineOnly ? featuredFiltered.filter(t => isDeadlineSoon(t, now)) : featuredFiltered
+  const sorted = applySort(deadlineFiltered, deadlineOnly ? 'deadline' : sort)
 
   const isSearching = Boolean(query.trim())
-  const groupByMonth = sort === 'date' && !isSearching && !prizeOnly
-  const prizeTournaments = !isSearching && !prizeOnly && region === 'all'
-    ? sorted.filter(t => isPrizeTournament(t))
+  const isFilteredView = prizeOnly || featuredOnly || deadlineOnly
+  const showSegmentedSections = !isSearching && !isFilteredView && region === 'all'
+  const groupByMonth = sort === 'date' && !isSearching && !isFilteredView
+
+  const featuredTournaments = showSegmentedSections
+    ? sorted.filter(t => isFeaturedTournament(t))
+    : []
+  const featuredIds = new Set(featuredTournaments.map(t => t.id))
+  const prizeTournaments = showSegmentedSections
+    ? sorted.filter(t => !featuredIds.has(t.id) && isPrizeTournament(t))
     : []
   const prizeIds = new Set(prizeTournaments.map(t => t.id))
-  const featured = !isSearching && !prizeOnly && region === 'all'
-    ? sorted.filter(t => !prizeIds.has(t.id) && (t.region === 'tokyo' || t.region === 'kanto'))
+  const deadlineSoonTournaments = showSegmentedSections
+    ? sorted.filter(t => !featuredIds.has(t.id) && !prizeIds.has(t.id) && isDeadlineSoon(t, now))
     : []
-  const others = !isSearching && !prizeOnly && region === 'all'
-    ? sorted.filter(t => !prizeIds.has(t.id) && t.region !== 'tokyo' && t.region !== 'kanto')
+  const deadlineIds = new Set(deadlineSoonTournaments.map(t => t.id))
+  const consumedIds = new Set([...featuredIds, ...prizeIds, ...deadlineIds])
+  const featured = showSegmentedSections
+    ? sorted.filter(t => !consumedIds.has(t.id) && (t.region === 'tokyo' || t.region === 'kanto'))
+    : []
+  const others = showSegmentedSections
+    ? sorted.filter(t => !consumedIds.has(t.id) && t.region !== 'tokyo' && t.region !== 'kanto')
     : []
 
   return (
@@ -176,6 +202,34 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
               emptyHint="別のキーワードや、検索ボックスをクリアして全件表示してみてください"
             />
           </section>
+        ) : deadlineOnly ? (
+          <section>
+            <SectionHeading
+              title="⏰ 締切が7日以内に迫っている大会"
+              caption={`${sorted.length}件`}
+              accent="deadline"
+            />
+            <TournamentList
+              tournaments={sorted}
+              now={now}
+              emptyMessage="今は締切が近い大会はありません"
+              emptyHint="トップに戻って、開催日順の一覧をご覧ください"
+            />
+          </section>
+        ) : featuredOnly ? (
+          <section>
+            <SectionHeading
+              title="👑 全国アマチュアの主要大会"
+              caption={`${sorted.length}件`}
+              accent="featured"
+            />
+            <TournamentList
+              tournaments={sorted}
+              now={now}
+              emptyMessage="今は主要大会の掲載がありません"
+              emptyHint="アマ竜王戦・アマ名人戦などは年に1度の開催です。トップに戻って通常の一覧をご覧ください"
+            />
+          </section>
         ) : prizeOnly ? (
           <section>
             <SectionHeading
@@ -192,6 +246,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
           </section>
         ) : region === 'all' ? (
           <>
+            {featuredTournaments.length > 0 && (
+              <section className="mb-10">
+                <SectionHeading
+                  title="👑 全国アマチュアの主要大会"
+                  caption={`${featuredTournaments.length}件`}
+                  accent="featured"
+                />
+                <TournamentList
+                  tournaments={featuredTournaments}
+                  now={now}
+                  emptyMessage="今は主要大会の掲載がありません"
+                />
+              </section>
+            )}
             {prizeTournaments.length > 0 && (
               <section className="mb-10">
                 <SectionHeading
@@ -203,6 +271,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
                   tournaments={prizeTournaments}
                   now={now}
                   emptyMessage="今は賞金大会の掲載がありません"
+                />
+              </section>
+            )}
+            {deadlineSoonTournaments.length > 0 && (
+              <section className="mb-10">
+                <SectionHeading
+                  title="⏰ 締切が7日以内に迫っている大会"
+                  caption={`${deadlineSoonTournaments.length}件`}
+                  accent="deadline"
+                />
+                <TournamentList
+                  tournaments={deadlineSoonTournaments}
+                  now={now}
+                  emptyMessage="今は締切が近い大会はありません"
                 />
               </section>
             )}
@@ -264,7 +346,7 @@ function SectionHeading({
 }: {
   title: string
   caption?: string
-  accent?: 'tokyo' | 'kanto' | 'prize'
+  accent?: 'tokyo' | 'kanto' | 'prize' | 'featured' | 'deadline'
 }) {
   const accentClass =
     accent === 'tokyo'
@@ -273,7 +355,11 @@ function SectionHeading({
         ? 'before:bg-kanto-600'
         : accent === 'prize'
           ? 'before:bg-amber-500'
-          : 'before:bg-shogi-700'
+          : accent === 'featured'
+            ? 'before:bg-gradient-to-b before:from-violet-600 before:to-fuchsia-600'
+            : accent === 'deadline'
+              ? 'before:bg-deadline-500'
+              : 'before:bg-shogi-700'
   return (
     <div className="mb-4 flex items-end justify-between gap-3">
       <h2

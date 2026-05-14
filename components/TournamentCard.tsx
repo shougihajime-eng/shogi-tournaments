@@ -3,6 +3,7 @@ import type { Tournament } from '@/lib/types/tournament'
 import { Badge } from '@/components/Badge'
 import { ReactionButtons } from '@/components/ReactionButtons'
 import { evaluatePrize } from '@/lib/filters/prize'
+import { evaluateFeatured } from '@/lib/filters/featured'
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
@@ -77,9 +78,11 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
   const deadline = formatDeadline(t)
   const deadlineRelative = formatRelativeDay(t.application_deadline, now)
   const eventRelative = formatRelativeDay(t.event_date_start, now)
-  const sourceLabel = t.source === 'jsa' ? '日本将棋連盟' : 'アマレン'
+  const sourceLabel =
+    t.source === 'jsa' ? '日本将棋連盟' : t.source === 'amaren' ? 'アマレン' : '将棋大会案内'
   const yearISO = t.event_date_start ? t.event_date_start.slice(0, 4) : null
   const prize = evaluatePrize(t)
+  const featured = evaluateFeatured(t)
 
   return (
     <article
@@ -109,6 +112,9 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
           <Badge variant={t.source === 'jsa' ? 'jsa' : 'amaren'}>{sourceLabel}</Badge>
           {t.region === 'tokyo' && <Badge variant="tokyo">東京</Badge>}
           {t.region === 'kanto' && <Badge variant="kanto">関東</Badge>}
+          {featured.isFeatured && (
+            <Badge variant="featured">👑 {featured.label ?? '主要大会'}</Badge>
+          )}
           {prize.isPrize && (
             <Badge variant="prize">💰 {prize.label ?? '賞金あり'}</Badge>
           )}
