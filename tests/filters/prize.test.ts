@@ -8,10 +8,22 @@ describe('evaluatePrize', () => {
     expect(r.label).toBe('優勝50万円')
   })
 
-  it('都名人戦を15万円として検出', () => {
+  it('都名人戦を賞金大会として検出（金額未確認のため「賞金あり」）', () => {
     const r = evaluatePrize({ title: '第75回都名人戦', description: null })
     expect(r.isPrize).toBe(true)
-    expect(r.label).toBe('優勝15万円')
+    expect(r.label).toBe('賞金あり')
+  })
+
+  it('アマ最強戦を賞金大会として検出（年度で金額が変動するため「賞金あり」）', () => {
+    const r = evaluatePrize({ title: 'アマ最強戦', description: null })
+    expect(r.isPrize).toBe(true)
+    expect(r.label).toBe('賞金あり')
+  })
+
+  it('升田幸三名人杯も賞品大会として検出', () => {
+    const r = evaluatePrize({ title: '升田幸三名人杯将棋大会', description: null })
+    expect(r.isPrize).toBe(true)
+    expect(r.label).toBe('賞品あり')
   })
 
   it('FUYOU杯茨城を10万円として検出', () => {
@@ -52,7 +64,7 @@ describe('evaluatePrize', () => {
   })
 
   it('prizeLabel ヘルパー', () => {
-    expect(prizeLabel({ title: '都名人戦', description: null })).toBe('優勝15万円')
+    expect(prizeLabel({ title: 'アマ竜王戦', description: null })).toBe('優勝50万円')
     expect(prizeLabel({ title: '町道場', description: null })).toBeNull()
   })
 })
