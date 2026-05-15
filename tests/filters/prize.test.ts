@@ -8,22 +8,20 @@ describe('evaluatePrize', () => {
     expect(r.label).toBe('優勝50万円')
   })
 
-  it('都名人戦を賞金大会として検出（金額未確認のため「賞金あり」）', () => {
+  it('都名人戦は出典未確認のため賞金大会としては判定しない', () => {
     const r = evaluatePrize({ title: '第75回都名人戦', description: null })
-    expect(r.isPrize).toBe(true)
-    expect(r.label).toBe('賞金あり')
+    expect(r.isPrize).toBe(false)
   })
 
-  it('アマ最強戦を賞金大会として検出（年度で金額が変動するため「賞金あり」）', () => {
-    const r = evaluatePrize({ title: 'アマ最強戦', description: null })
+  it('アマ最強戦を2024年実績の12万円として検出', () => {
+    const r = evaluatePrize({ title: '令和6年アマ最強戦', description: null })
     expect(r.isPrize).toBe(true)
-    expect(r.label).toBe('賞金あり')
+    expect(r.label).toBe('優勝12万円')
   })
 
-  it('升田幸三名人杯も賞品大会として検出', () => {
+  it('升田幸三名人杯は出典未確認のため判定しない', () => {
     const r = evaluatePrize({ title: '升田幸三名人杯将棋大会', description: null })
-    expect(r.isPrize).toBe(true)
-    expect(r.label).toBe('賞品あり')
+    expect(r.isPrize).toBe(false)
   })
 
   it('FUYOU杯茨城を10万円として検出', () => {
@@ -48,9 +46,9 @@ describe('evaluatePrize', () => {
     expect(r.label).toBe('賞金20万円')
   })
 
-  it('茨城新聞社杯を賞金大会として検出', () => {
+  it('茨城新聞社杯は賞金額未公表のため判定しない（参加方法メモで補完）', () => {
     const r = evaluatePrize({ title: '第45回 茨城新聞社杯争奪将棋大会 鹿行予選', description: null })
-    expect(r.isPrize).toBe(true)
+    expect(r.isPrize).toBe(false)
   })
 
   it('普通の地域大会は賞金大会と判定しない', () => {
