@@ -8,6 +8,7 @@ import { ReactionButtons } from '@/components/ReactionButtons'
 import { AppHeader } from '@/components/AppHeader'
 import { AppFooter } from '@/components/AppFooter'
 import { SkipLink } from '@/components/SkipLink'
+import { getTournamentNote } from '@/lib/data/tournament-notes'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -74,6 +75,7 @@ export default async function TournamentDetail({ params }: { params: Promise<{ i
   const daysToDeadline = daysUntil(t.application_deadline, now)
   const isToday = daysToEvent === 0
   const isDeadlineSoon = daysToDeadline !== null && daysToDeadline >= 0 && daysToDeadline <= 7
+  const note = getTournamentNote(t)
 
   // schema.org Event 構造化データ
   const jsonLd: Record<string, unknown> = {
@@ -226,6 +228,67 @@ export default async function TournamentDetail({ params }: { params: Promise<{ i
             </div>
           </div>
         </article>
+
+        {note && (
+          <section
+            aria-labelledby="note-title"
+            className="mt-6 rounded-xl border border-amber-300 bg-amber-50 p-5 sm:p-6"
+          >
+            <h2
+              id="note-title"
+              className="font-serif text-lg font-bold text-amber-900 sm:text-xl"
+            >
+              💡 {note.title}
+            </h2>
+            <ul className="mt-3 space-y-2 text-sm leading-relaxed text-ink-800 sm:text-base">
+              {note.bullets.map((b, i) => (
+                <li key={i} className="flex gap-2">
+                  <span aria-hidden className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+            {note.contact && note.contact.length > 0 && (
+              <div className="mt-4 rounded-lg bg-white/70 px-4 py-3 ring-1 ring-amber-200">
+                <div className="text-xs font-bold tracking-wide text-amber-900">問い合わせ先</div>
+                <ul className="mt-1 space-y-1 text-sm text-ink-800">
+                  {note.contact.map((c, i) => (
+                    <li key={i}>
+                      <span className="font-semibold">{c.label}</span>
+                      {c.phone && (
+                        <>
+                          {'：'}
+                          <a
+                            href={`tel:${c.phone}`}
+                            className="font-mono tabular-nums text-shogi-700 hover:text-shogi-900 hover:underline"
+                          >
+                            {c.phone}
+                          </a>
+                        </>
+                      )}
+                      {c.url && (
+                        <>
+                          {'：'}
+                          <a
+                            href={c.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-shogi-700 hover:text-shogi-900 hover:underline"
+                          >
+                            {c.url}
+                          </a>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {note.source && (
+              <p className="mt-3 text-xs text-amber-800/80">出典: {note.source}</p>
+            )}
+          </section>
+        )}
 
         <p className="mt-6 text-center text-xs text-ink-500">
           掲載情報は変更される場合があります。最新の正確な情報は必ず公式ページでご確認ください。

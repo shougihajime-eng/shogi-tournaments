@@ -4,6 +4,7 @@ import { Badge } from '@/components/Badge'
 import { ReactionButtons } from '@/components/ReactionButtons'
 import { evaluatePrize } from '@/lib/filters/prize'
 import { evaluateFeatured } from '@/lib/filters/featured'
+import { hasTournamentNote } from '@/lib/data/tournament-notes'
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
@@ -83,6 +84,7 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
   const yearISO = t.event_date_start ? t.event_date_start.slice(0, 4) : null
   const prize = evaluatePrize(t)
   const featured = evaluateFeatured(t)
+  const hasNote = hasTournamentNote(t)
 
   const baseFrame = featured.isFeatured
     ? 'featured-frame border-murasaki-200 shadow-glow-featured'
@@ -130,6 +132,7 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
           {prize.isPrize && (
             <Badge variant="prize">💰 {prize.label ?? '賞金あり'}</Badge>
           )}
+          {hasNote && <Badge variant="neutral">💡 参加方法メモあり</Badge>}
           {isNew && <Badge variant="new">NEW</Badge>}
           {isDeadlineSoon && <Badge variant="deadline">締切間近</Badge>}
         </div>
