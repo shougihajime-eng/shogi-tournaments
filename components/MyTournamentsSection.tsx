@@ -36,8 +36,9 @@ export function MyTournamentsSection({ tournaments, now }: { tournaments: Tourna
 
   return (
     <section
+      id="my-tournaments"
       aria-label="あなたが選んだ大会"
-      className="mb-8 overflow-hidden rounded-xl border border-shogi-200 bg-gradient-to-br from-shogi-50 via-white to-white shadow-card"
+      className="mb-8 scroll-mt-4 overflow-hidden rounded-xl border border-shogi-200 bg-gradient-to-br from-shogi-50 via-white to-white shadow-card"
     >
       <header className="flex items-center justify-between gap-3 border-b border-shogi-100 bg-white/60 px-5 py-3.5">
         <div className="flex items-center gap-3">

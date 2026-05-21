@@ -5,6 +5,8 @@ import { ReactionButtons } from '@/components/ReactionButtons'
 import { evaluatePrize } from '@/lib/filters/prize'
 import { evaluateFeatured } from '@/lib/filters/featured'
 import { hasTournamentNote } from '@/lib/data/tournament-notes'
+import { looksLikeDateText } from '@/lib/normalizers/date'
+import { evaluateEntryType } from '@/lib/filters/entry-type'
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
@@ -50,7 +52,11 @@ function formatDateRange(t: Tournament): string {
     }
     return start
   }
-  return t.event_date_text ?? '日程未定'
+  // 既存DBに残る誤抽出（電話番号など）が混入するのを表示側でも防ぐ
+  if (t.event_date_text && looksLikeDateText(t.event_date_text)) {
+    return t.event_date_text
+  }
+  return '日程未定'
 }
 
 function formatRelativeDay(iso: string | null, now: Date): string | null {
@@ -85,6 +91,7 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
   const prize = evaluatePrize(t)
   const featured = evaluateFeatured(t)
   const hasNote = hasTournamentNote(t)
+  const entry = evaluateEntryType(t)
 
   const baseFrame = featured.isFeatured
     ? 'featured-frame border-murasaki-200 shadow-glow-featured'
@@ -133,6 +140,9 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
             <Badge variant="prize">💰 {prize.label ?? '賞金あり'}</Badge>
           )}
           {hasNote && <Badge variant="neutral">💡 参加方法メモあり</Badge>}
+          {entry.type === 'walkin' && <Badge variant="entry-walkin">🚶 当日受付OK</Badge>}
+          {entry.type === 'pre' && <Badge variant="entry-pre">📝 事前申込</Badge>}
+          {entry.type === 'both' && <Badge variant="entry-both">📝🚶 事前/当日OK</Badge>}
           {isNew && <Badge variant="new">NEW</Badge>}
           {isDeadlineSoon && <Badge variant="deadline">締切間近</Badge>}
         </div>
@@ -146,6 +156,19 @@ export function TournamentCard({ tournament, now }: { tournament: Tournament; no
             {t.title}
           </Link>
         </h3>
+
+        {/* 賞金額（賞金大会のときのみ強調表示） */}
+        {prize.isPrize && prize.label && (
+          <div className="mt-3 flex items-center gap-2 rounded-lg border border-kin-400/40 bg-gradient-to-r from-kin-50 to-amber-50 px-3 py-2">
+            <span aria-hidden className="text-lg">💰</span>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-semibold tracking-wide text-amber-700">賞金</span>
+              <span className="font-serif text-base font-bold leading-tight text-amber-900">
+                {prize.label}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* 開催日（強調） */}
         <div className="mt-3 rounded-lg bg-ink-50 px-3 py-2.5">

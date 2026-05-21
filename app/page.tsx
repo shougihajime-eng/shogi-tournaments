@@ -9,8 +9,9 @@ import { StatsBanner } from '@/components/StatsBanner'
 import { AppFooter } from '@/components/AppFooter'
 import { SkipLink } from '@/components/SkipLink'
 import { BackToTopButton } from '@/components/BackToTopButton'
-import { isPrizeTournament } from '@/lib/filters/prize'
+import { isPrizeTournament, prizeAmountYen } from '@/lib/filters/prize'
 import { isFeaturedTournament } from '@/lib/filters/featured'
+import { dedupeTournaments } from '@/lib/utils/dedupe'
 import { Suspense } from 'react'
 
 export const dynamic = 'force-dynamic'
@@ -26,7 +27,7 @@ function normalizeRegion(input: string | undefined): RegionFilter {
 }
 
 function normalizeSort(input: string | undefined): SortKey {
-  if (input === 'deadline' || input === 'newest') return input
+  if (input === 'deadline' || input === 'newest' || input === 'prize') return input
   return 'date'
 }
 
@@ -107,6 +108,18 @@ function applySort(items: Tournament[], sort: SortKey): Tournament[] {
     })
   } else if (sort === 'newest') {
     list.sort((a, b) => b.first_seen_at.localeCompare(a.first_seen_at))
+  } else if (sort === 'prize') {
+    list.sort((a, b) => {
+      const diff = prizeAmountYen(b) - prizeAmountYen(a)
+      if (diff !== 0) return diff
+      const aHas = Boolean(a.event_date_start)
+      const bHas = Boolean(b.event_date_start)
+      if (aHas !== bHas) return aHas ? -1 : 1
+      if (a.event_date_start && b.event_date_start) {
+        return a.event_date_start.localeCompare(b.event_date_start)
+      }
+      return 0
+    })
   } else {
     list.sort((a, b) => {
       const aHas = Boolean(a.event_date_start)
@@ -130,7 +143,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
   const featuredOnly = params.featured === '1'
   const deadlineOnly = params.deadline === '1'
 
-  const [allTournaments, latestRun] = await Promise.all([loadTournaments(), loadLatestRun()])
+  const [rawTournaments, latestRun] = await Promise.all([loadTournaments(), loadLatestRun()])
+  const allTournaments = dedupeTournaments(rawTournaments)
   const now = new Date()
 
   const counts = {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseDate } from '@/lib/normalizers/date'
+import { looksLikeDateText, parseDate } from '@/lib/normalizers/date'
 
 describe('parseDate', () => {
   describe('single date formats', () => {
@@ -92,5 +92,50 @@ describe('parseDate', () => {
       const result = parseDate('２０２６／５／３')
       expect(result.start).toBe('2026-05-03')
     })
+  })
+
+  describe('phone-number-like strings are rejected', () => {
+    it('returns null for 0880-9-68 (looks like phone area code)', () => {
+      const result = parseDate('0880-9-68')
+      expect(result.start).toBeNull()
+      expect(result.end).toBeNull()
+    })
+
+    it('returns null for 0880-9-6 (4-digit year out of range)', () => {
+      const result = parseDate('0880-9-6')
+      expect(result.start).toBeNull()
+    })
+
+    it('returns null for 0120-456-789 (toll-free pattern)', () => {
+      const result = parseDate('0120-456-789')
+      expect(result.start).toBeNull()
+    })
+
+    it('returns null for year 1899 (too old)', () => {
+      const result = parseDate('1899-5-3')
+      expect(result.start).toBeNull()
+    })
+
+    it('returns null for year 2200 (too far future)', () => {
+      const result = parseDate('2200-5-3')
+      expect(result.start).toBeNull()
+    })
+  })
+})
+
+describe('looksLikeDateText', () => {
+  it('returns true for 月 / 日 / 年 keywords', () => {
+    expect(looksLikeDateText('5月上旬')).toBe(true)
+    expect(looksLikeDateText('2026年内')).toBe(true)
+    expect(looksLikeDateText('未定')).toBe(true)
+    expect(looksLikeDateText('第3週')).toBe(true)
+    expect(looksLikeDateText('第二週')).toBe(true)
+  })
+
+  it('returns false for phone-number-like strings', () => {
+    expect(looksLikeDateText('0880-9-68')).toBe(false)
+    expect(looksLikeDateText('03-1234-5678')).toBe(false)
+    expect(looksLikeDateText('')).toBe(false)
+    expect(looksLikeDateText(null)).toBe(false)
   })
 })

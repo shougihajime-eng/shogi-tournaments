@@ -13,7 +13,8 @@ const REGION_OPTIONS: Array<{ key: RegionFilter; label: string; count?: number }
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: 'date', label: '開催日が近い順' },
   { key: 'deadline', label: '締切が近い順' },
-  { key: 'newest', label: '新着順' }
+  { key: 'newest', label: '新着順' },
+  { key: 'prize', label: '賞金が高い順' }
 ]
 
 export function FilterBar({

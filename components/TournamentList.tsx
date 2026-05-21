@@ -93,21 +93,55 @@ export function TournamentList({
   }
 
   const groups = groupByMonth(tournaments)
+  const datedGroups = groups.filter(([key]) => key !== '__no-date')
+  const undated = groups.find(([key]) => key === '__no-date')?.[1] ?? []
+
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {groups.map(([key, items]) => {
-        const { label, sub } = formatMonth(key, now)
-        return (
-          <div key={key} className="contents">
-            <MonthDivider label={label} sub={sub} count={items.length} />
-            {items.map(t => (
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {datedGroups.map(([key, items]) => {
+          const { label, sub } = formatMonth(key, now)
+          return (
+            <div key={key} className="contents">
+              <MonthDivider label={label} sub={sub} count={items.length} />
+              {items.map(t => (
+                <div key={t.id} className="animate-slide-up">
+                  <TournamentCard tournament={t} now={now} />
+                </div>
+              ))}
+            </div>
+          )
+        })}
+      </div>
+      {undated.length > 0 && (
+        <details className="mt-6 rounded-xl border border-ink-200 bg-white">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-bold text-ink-700 hover:bg-ink-50">
+            <span className="flex items-center gap-2">
+              <svg
+                aria-hidden
+                width="16"
+                height="16"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                className="text-ink-400 transition-transform group-open:rotate-90"
+              >
+                <path d="M6 4l8 6-8 6V4z" />
+              </svg>
+              日程未定の大会
+            </span>
+            <span className="text-xs font-normal text-ink-500 tabular-nums">
+              {undated.length}件・タップで開く
+            </span>
+          </summary>
+          <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3">
+            {undated.map(t => (
               <div key={t.id} className="animate-slide-up">
                 <TournamentCard tournament={t} now={now} />
               </div>
             ))}
           </div>
-        )
-      })}
-    </div>
+        </details>
+      )}
+    </>
   )
 }

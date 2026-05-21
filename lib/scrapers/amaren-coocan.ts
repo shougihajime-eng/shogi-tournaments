@@ -75,7 +75,10 @@ export async function scrape(): Promise<ScrapedTournament[]> {
 
 function extractDate(text: string): string | null {
   const ymd = text.match(/(\d{4})\s*[\/\-年]\s*(\d{1,2})\s*[\/\-月]\s*(\d{1,2})\s*日?/)
-  if (ymd) return ymd[0]
+  if (ymd) {
+    const y = parseInt(ymd[1], 10)
+    if (y >= 1990 && y <= 2100) return ymd[0]
+  }
   return null
 }
 

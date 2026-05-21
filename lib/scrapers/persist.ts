@@ -2,7 +2,7 @@ import type { ScrapedTournament, ScrapeOutcome, Source } from '@/lib/scrapers/ty
 import { getServiceClient } from '@/lib/supabase/server'
 import { evaluateExclusion } from '@/lib/filters/exclusion'
 import { classifyRegion, extractPrefecture } from '@/lib/normalizers/region'
-import { parseDate } from '@/lib/normalizers/date'
+import { looksLikeDateText, parseDate } from '@/lib/normalizers/date'
 
 export type PersistResult = {
   source: Source
@@ -61,6 +61,11 @@ function buildRow(item: ScrapedTournament, now: string, firstSeenAt: string | nu
     if (!start) start = parsed.start
     if (!end) end = parsed.end
     if (!dateText) dateText = parsed.text || item.event_date_text
+  }
+  // 日付として解釈できず、テキストにも「月/日/年/上旬/未定」等の日付キーワードがない場合は
+  // 電話番号・郵便番号などの誤抽出とみなしてテキストごと捨てる
+  if (!start && !end && dateText && !looksLikeDateText(dateText)) {
+    dateText = null
   }
 
   let deadline = item.application_deadline

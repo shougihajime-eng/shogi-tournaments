@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { RefreshButton } from '@/components/RefreshButton'
+import { MyListLink } from '@/components/MyListLink'
 
 function formatRelative(iso: string | null, now: Date): string {
   if (!iso) return '未取得'
@@ -57,6 +58,7 @@ export function AppHeader({ lastUpdatedAt, now }: { lastUpdatedAt: string | null
         </Link>
 
         <div className="flex items-center gap-3">
+          <MyListLink />
           <span className="hidden text-xs text-koma-200 sm:inline tabular-nums">
             {formatRelative(lastUpdatedAt, now)}
           </span>

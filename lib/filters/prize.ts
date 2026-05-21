@@ -67,3 +67,19 @@ export function isPrizeTournament(t: Pick<Tournament, 'title' | 'description'>):
 export function prizeLabel(t: Pick<Tournament, 'title' | 'description'>): string | null {
   return evaluatePrize(t).label
 }
+
+// 並び替え用に賞金額を「円」で返す。
+// - 賞金大会でない: 0
+// - 金額が判明（「優勝50万円」など）: 円換算（500000）
+// - 金額不明（「マグロ1本」など）: 1（並び替えで最後尾に来るが、賞金なしより前）
+export function prizeAmountYen(t: Pick<Tournament, 'title' | 'description'>): number {
+  const info = evaluatePrize(t)
+  if (!info.isPrize) return 0
+  if (!info.label) return 1
+  const m = info.label.match(/(\d+(?:[,，]\d{3})*)\s*万/)
+  if (m) {
+    const num = parseInt(m[1].replace(/[,，]/g, ''), 10)
+    if (Number.isFinite(num)) return num * 10000
+  }
+  return 1
+}

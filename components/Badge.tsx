@@ -12,6 +12,9 @@ type Variant =
   | 'neutral'
   | 'prize'
   | 'featured'
+  | 'entry-walkin'
+  | 'entry-pre'
+  | 'entry-both'
 
 const STYLES: Record<Variant, string> = {
   jsa: 'bg-shogi-50 text-shogi-800 ring-1 ring-inset ring-shogi-200',
@@ -24,7 +27,10 @@ const STYLES: Record<Variant, string> = {
   interest: 'bg-interest-100 text-interest-700 ring-1 ring-inset ring-interest-500/40',
   neutral: 'bg-ink-100 text-ink-700 ring-1 ring-inset ring-ink-200',
   prize: 'bg-amber-100 text-amber-900 ring-1 ring-inset ring-amber-300',
-  featured: 'bg-gradient-to-r from-murasaki-600 to-murasaki-500 text-white shadow-sm'
+  featured: 'bg-gradient-to-r from-murasaki-600 to-murasaki-500 text-white shadow-sm',
+  'entry-walkin': 'bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-300',
+  'entry-pre': 'bg-sky-50 text-sky-800 ring-1 ring-inset ring-sky-300',
+  'entry-both': 'bg-teal-50 text-teal-800 ring-1 ring-inset ring-teal-300'
 }
 
 export function Badge({ variant, children }: { variant: Variant; children: ReactNode }) {
