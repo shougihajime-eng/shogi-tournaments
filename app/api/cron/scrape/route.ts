@@ -5,6 +5,8 @@ import { isServiceClientAvailable } from '@/lib/supabase/server'
 import type { ScrapeOutcome } from '@/lib/scrapers/types'
 
 export const dynamic = 'force-dynamic'
+// jsa-store(臨時)が詳細ページを1件ずつ間隔を空けて読むため、余裕を持たせる
+export const maxDuration = 60
 
 async function runScrapers(): Promise<ScrapeOutcome[]> {
   try {

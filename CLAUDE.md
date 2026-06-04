@@ -107,3 +107,19 @@ DB変更なし、毎日のスクレイピング後に既存データへ自動反
 ## ローカル開発（実装後に追記）
 - `.env.local` に `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` を配置
 - `npm install` → `npm run dev`
+
+---
+
+## 🚨 2026-06-04 日本将棋連盟の公式サイトが停止中（全アプリ共通のお知らせ）
+- 連盟の公式ホームページ（www.shogi.or.jp）は**サーバー攻撃を受けて停止・使用不可**（本人連絡 2026-06-04）。
+- 当面の公式情報は**臨時ページ** https://store.shogi.or.jp/view/page/tempsite に毎日掲載（お知らせ・対局予定/結果・イベント・奨励会など）。
+- **連盟サイトから情報を取る処理・調査・リンク確認はすべて臨時ページを使うこと**。自動取得（スクレイパー）は公式サイト復旧まで失敗する前提で扱う（エラーは故障ではなく連盟側の停止が原因）。
+- 復旧や新情報は本人から連絡が入り次第このメモを更新する。
+
+### 🔎 2026-06-04 停止の影響と代わりの情報源（調査済み）
+- 本アプリの自動取得3本（jsa-event=event/カレンダー・jsa-info=event/info/・jsa-tournament=tournament/）は**取得元ページごと停止中**＝毎朝の自動実行（Vercel cron 06:00 JST）は失敗または0件になる。エラーは故障ではない。
+- **代わりに使える場所（確認済み・2026-06-04）**：
+  1. 連盟ストアの**大会申し込み一覧** https://store.shogi.or.jp/view/category/tournament … 実際の大会（高校生王将戦・アマ名人戦 都道府県予選など）が `/view/item/...` のリンク一覧で載っており**機械で読める構造**。
+  2. 臨時ページ https://store.shogi.or.jp/view/page/tempsite … 手書き更新のお知らせ面（毎朝10時ごろ更新）。【臨時掲載】主要アマ全国大会 都道府県予選情報は関西将棋情報サイト（kansai-shogi.info）へのリンク。
+  3. イベントは https://store.shogi.or.jp/view/category/item 。
+- 対応案（本人未決・実装する場合）：ストアの tournament/item カテゴリを読む臨時スクレイパーを `lib/scrapers/` に追加し、`source` を分けて Supabase に upsert（公式復旧後に止めやすくする）。臨時ページ自体は手書きで構造が変わりやすいのでスクレイパー化しない。
