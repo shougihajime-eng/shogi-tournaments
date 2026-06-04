@@ -123,3 +123,9 @@ DB変更なし、毎日のスクレイピング後に既存データへ自動反
   2. 臨時ページ https://store.shogi.or.jp/view/page/tempsite … 手書き更新のお知らせ面（毎朝10時ごろ更新）。【臨時掲載】主要アマ全国大会 都道府県予選情報は関西将棋情報サイト（kansai-shogi.info）へのリンク。
   3. イベントは https://store.shogi.or.jp/view/category/item 。
 - 対応案（本人未決・実装する場合）：ストアの tournament/item カテゴリを読む臨時スクレイパーを `lib/scrapers/` に追加し、`source` を分けて Supabase に upsert（公式復旧後に止めやすくする）。臨時ページ自体は手書きで構造が変わりやすいのでスクレイパー化しない。
+
+### ✅ 2026-06-04 臨時スクレイパー jsa-store 稼働開始（公式サイト停止対策・本番反映済み）
+- `lib/scrapers/jsa-store.ts` 新設＝連盟ストア「大会申し込み」(`store.shogi.or.jp/view/category/tournament`) の一覧→各商品ページから 日程/会場/申込期間/参加資格/連絡先 を抽出（700ms間隔・上限30件・`category_page_id=tournament`付きリンクのみ＝「寄付する」等を除外）。申込期間「5/26～6/26」は**終わりの日を締切**に採用。日付はタイトル【7月5日開催】からも補完。external_idはストア商品コードのsha1＝安定
+- 登録は `lib/scrapers/index.ts` の `jsa-store` 行。**公式復旧後はこの行を消すだけで停止**（既存jsa-*3本は残置済み＝復旧すれば自動で元に戻る）。cron/refresh に `maxDuration=60` 追加
+- 検証済み：vitest 5件（実ページfixture）／tsc 0／next build成功／**本番 /api/refresh で 取得14・新規14・success**（うち除外9=子ども向け方針どおり）。トップページに「アマ名人戦/アマ竜王戦 都予選」表示確認
+- 注意：ストア一覧は現在1ページ(14件)。ページ送りが増えたら parseList の拡張が必要
