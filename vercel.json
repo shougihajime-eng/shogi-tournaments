@@ -1,4 +1,5 @@
 {
+  "regions": ["hnd1"],
   "crons": [
     { "path": "/api/cron/scrape", "schedule": "0 21 * * *" },
     { "path": "/api/cron/check-schemas", "schedule": "30 21 * * *" }
