@@ -25,6 +25,15 @@ export const metadata: Metadata = {
     '日本将棋連盟・日本アマチュア将棋連盟の公式情報から、大人が参加できる将棋大会を毎日自動収集。東京・関東を中心に開催日・場所・申込みまで一覧で確認できます。',
   keywords: ['将棋', '大会', 'アマチュア', '日本将棋連盟', 'アマレン', 'シニア大会', '段級位', '東京', '関東'],
   authors: [{ name: '将棋大会ナビ' }],
+  icons: {
+    icon: '/icon.svg',
+    apple: '/icon.svg'
+  },
+  appleWebApp: {
+    capable: true,
+    title: '将棋大会',
+    statusBarStyle: 'default'
+  },
   openGraph: {
     type: 'website',
     locale: 'ja_JP',
