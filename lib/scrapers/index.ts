@@ -8,11 +8,15 @@ import * as shoShogi from './sho-shogi'
 import * as jsaStore from './jsa-store'
 
 export const SCRAPERS = [
+  // 2026-06-16 連盟サイトリニューアル後の新ソースに対応:
+  //   jsa-event     → /news/?cat=event（旧 /event/ はJS描画になり取れない）
+  //   jsa-info      → /news/?cat=taikai（旧 /event/info/ は404廃止）
+  //   jsa-tournament→ /event/tournament/（旧 /tournament/ は404）
   { id: 'jsa-event', source: 'jsa' as const, scrape: jsaEvent.scrape },
   { id: 'jsa-info', source: 'jsa' as const, scrape: jsaInfo.scrape },
   { id: 'jsa-tournament', source: 'jsa' as const, scrape: jsaTournament.scrape },
-  // 【臨時】公式サイト停止中(2026-06-04〜)の代替: 連盟ストアの大会申し込み一覧。
-  // 公式が復旧して上3本が動き出したら、この行を消すだけで止められる。
+  // 連盟ストアの大会申し込み一覧（store.shogi.or.jp）。公式サイト停止中に追加した補完ソース。
+  // 今も生きているので残す（大会の申込ページ・締切が取れる）。
   { id: 'jsa-store', source: 'jsa' as const, scrape: jsaStore.scrape },
   { id: 'amaren-coocan', source: 'amaren' as const, scrape: amarenCoocan.scrape },
   { id: 'amaren-rsys', source: 'amaren' as const, scrape: amarenRsys.scrape },

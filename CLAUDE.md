@@ -3,9 +3,10 @@
 大人が参加できる将棋大会情報を、日本将棋連盟（JSA）と日本アマチュア将棋連盟（アマレン）の公式サイトから自動収集して表示する Web アプリ。
 
 ## 進捗（いまここ）
-最終更新: 2026-05-22
+最終更新: 2026-06-16
 
 - ✅ 直近で済んだこと:
+  - **連盟サイト復活＋全面リニューアル対応**（2026-06-16）: 連盟スクレイパー3本（jsa-event/info/tournament）が新URL・新HTML構造で壊れていたのを、新ソース（/event/tournament/ と /news/?cat=taikai・/news/?cat=event）に作り直し。共通ニュースパーサ jsa-news.ts を新設。テスト・型・ビルド合格、本番公開済み（詳細は下の「✅ 2026-06-16」節）
   - **本番障害復旧**（2026-05-22）: 共有Supabaseの PostgREST 設定に「存在しないスキーマ `manfune_lab`」が混入していて schema cache 構築が失敗。設定から削除して即復旧（コードは無関係）
 - ✅ 過去に済んだこと:
   - **鈴木さんフィードバック5件まとめて反映**:
@@ -58,13 +59,14 @@ DB変更なし、毎日のスクレイピング後に既存データへ自動反
 - Supabase Postgres（`public` スキーマ）
 - スクレイピング: cheerio + fetch（動的レンダリングが必要なら Playwright + @sparticuz/chromium に切替）
 
-## ソースURL（6本）
-1. https://www.shogi.or.jp/event/
-2. https://www.shogi.or.jp/event/info/
-3. https://www.shogi.or.jp/tournament/
-4. https://amaren.la.coocan.jp/
-5. https://amaren.e5.valueserver.jp/Rsys/TournamentListAll.php
-6. https://sho-shogi.blogspot.com/ （全国アマチュア将棋大会の集約サイト・都名人戦/茨城新聞社杯などの記事が掲載される）
+## ソースURL（2026-06-16 連盟リニューアル後の実働URL）
+1. https://www.shogi.or.jp/event/tournament/ （jsa-tournament＝大会カテゴリ一覧。静的・cheerioで読める。旧 /tournament/ は404）
+2. https://www.shogi.or.jp/news/?cat=taikai （jsa-info＝大会お知らせ。旧 /event/info/ は404廃止）
+3. https://www.shogi.or.jp/news/?cat=event （jsa-event＝イベントお知らせ。旧 /event/ はJS描画で取れないため移行）
+4. https://store.shogi.or.jp/view/category/tournament （jsa-store＝連盟ストアの大会申し込み。停止中に追加した補完ソース・今も生きているので残置）
+5. https://amaren.la.coocan.jp/
+6. https://amaren.e5.valueserver.jp/Rsys/TournamentListAll.php
+7. https://sho-shogi.blogspot.com/ （全国アマチュア将棋大会の集約サイト・都名人戦/茨城新聞社杯などの記事が掲載される）
 
 ## 除外キーワード（タイトル/概要にマッチで `is_excluded=true`）
 - 子ども系: 小学生 / 中学生 / 高校生 / 小中学生 / 学生 / 児童 / 子ども / こども / キッズ / 青少年
@@ -110,11 +112,14 @@ DB変更なし、毎日のスクレイピング後に既存データへ自動反
 
 ---
 
-## 🚨 2026-06-04 日本将棋連盟の公式サイトが停止中（全アプリ共通のお知らせ）
-- 連盟の公式ホームページ（www.shogi.or.jp）は**サーバー攻撃を受けて停止・使用不可**（本人連絡 2026-06-04）。
-- 当面の公式情報は**臨時ページ** https://store.shogi.or.jp/view/page/tempsite に毎日掲載（お知らせ・対局予定/結果・イベント・奨励会など）。
-- **連盟サイトから情報を取る処理・調査・リンク確認はすべて臨時ページを使うこと**。自動取得（スクレイパー）は公式サイト復旧まで失敗する前提で扱う（エラーは故障ではなく連盟側の停止が原因）。
-- 復旧や新情報は本人から連絡が入り次第このメモを更新する。
+## ✅ 2026-06-16 連盟サイト復活（全面リニューアル＝新URL構成・対応済み）
+- 日本将棋連盟の公式サイト（www.shogi.or.jp）が復活したが、**全面的に作り直され、URLもHTML構造も変わった**ため、旧スクレイパー3本が壊れた。新ソースに作り直して対応済み：
+  - `jsa-tournament` → `https://www.shogi.or.jp/event/tournament/`（大会カテゴリ一覧・静的。旧 `/tournament/` は404）。カード(h3=大会名 + p=ひとこと説明)を抽出し、説明文に開催日があれば日付化（例「8月12日に開催」→2026-08-12）。
+  - `jsa-info` → `https://www.shogi.or.jp/news/?cat=taikai`（大会お知らせ。旧 `/event/info/` は404廃止）。
+  - `jsa-event` → `https://www.shogi.or.jp/news/?cat=event`（イベントお知らせ。旧 `/event/` はAlpine.jsのJS描画になり fetch+cheerio で取れないため移行）。jsa-info と同じ共通パーサ `lib/scrapers/jsa-news.ts` を共用。
+  - `jsa-store`（停止中に追加した補完ソース）は store.shogi.or.jp が今も生きているので残置。
+- fixtures は新HTMLに更新済み（`tests/fixtures/jsa-tournament/index.html`・`tests/fixtures/jsa-news/{taikai,event}.html`）。vitest・tsc・next build すべて合格。
+- 旧 `/event/` はJS描画前提なので、もし将来この一覧をそのまま取りたくなったら Playwright 等が必要（現状はニュース一覧で代替）。
 
 ### 🔎 2026-06-04 停止の影響と代わりの情報源（調査済み）
 - 本アプリの自動取得3本（jsa-event=event/カレンダー・jsa-info=event/info/・jsa-tournament=tournament/）は**取得元ページごと停止中**＝毎朝の自動実行（Vercel cron 06:00 JST）は失敗または0件になる。エラーは故障ではない。
