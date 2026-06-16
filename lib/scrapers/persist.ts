@@ -19,6 +19,10 @@ type ExistingRow = {
   source: Source
   external_id: string
   first_seen_at: string
+  event_date_start: string | null
+  event_date_end: string | null
+  event_date_text: string | null
+  location: string | null
 }
 
 type UpsertRow = {
@@ -46,7 +50,7 @@ type UpsertRow = {
   last_seen_at: string
 }
 
-function buildRow(item: ScrapedTournament, now: string, firstSeenAt: string | null): UpsertRow {
+function buildRow(item: ScrapedTournament, now: string, prev: ExistingRow | null): UpsertRow {
   const exclusion = evaluateExclusion(item.title, item.description, item.eligibility)
 
   const prefecture =
@@ -68,6 +72,17 @@ function buildRow(item: ScrapedTournament, now: string, firstSeenAt: string | nu
     dateText = null
   }
 
+  // 同じ external_id を別ソースが続けて upsert する場合（例: /event/ の jsa-event が
+  // 正確な開催日を入れた後、/news/?cat=taikai の jsa-info が同じ記事を日付なしで上書き）に
+  // 既に取れている開催日・会場を null で潰さない。新しい値が無い時だけ既存値を引き継ぐ。
+  if (prev) {
+    if (!start && prev.event_date_start) start = prev.event_date_start
+    if (!end && prev.event_date_end) end = prev.event_date_end
+    if (!dateText && prev.event_date_text) dateText = prev.event_date_text
+  }
+  let location = item.location
+  if (!location && prev?.location) location = prev.location
+
   let deadline = item.application_deadline
   if (!deadline && item.application_deadline_text) {
     const parsed = parseDate(item.application_deadline_text)
@@ -83,7 +98,7 @@ function buildRow(item: ScrapedTournament, now: string, firstSeenAt: string | nu
     event_date_start: start,
     event_date_end: end,
     event_date_text: dateText,
-    location: item.location,
+    location,
     prefecture,
     region,
     eligibility: item.eligibility,
@@ -95,7 +110,7 @@ function buildRow(item: ScrapedTournament, now: string, firstSeenAt: string | nu
     detail_url: item.detail_url,
     is_excluded: exclusion.isExcluded,
     excluded_reason: exclusion.reason,
-    first_seen_at: firstSeenAt ?? now,
+    first_seen_at: prev?.first_seen_at ?? now,
     last_seen_at: now
   }
 }
@@ -108,7 +123,7 @@ async function fetchExisting(
   if (externalIds.length === 0) return new Map()
   const { data, error } = await supabase
     .from('tournaments')
-    .select('id, source, external_id, first_seen_at')
+    .select('id, source, external_id, first_seen_at, event_date_start, event_date_end, event_date_text, location')
     .eq('source', source)
     .in('external_id', externalIds)
   if (error) throw new Error(`select existing failed: ${error.message}`)
@@ -148,8 +163,8 @@ export async function persistOutcome(outcome: ScrapeOutcome): Promise<PersistRes
 
     const now = new Date().toISOString()
     const rows: UpsertRow[] = outcome.items.map(item => {
-      const prev = existing.get(item.external_id)
-      return buildRow(item, now, prev?.first_seen_at ?? null)
+      const prev = existing.get(item.external_id) ?? null
+      return buildRow(item, now, prev)
     })
 
     for (const row of rows) {
