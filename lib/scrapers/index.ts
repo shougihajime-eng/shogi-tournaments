@@ -9,7 +9,7 @@ import * as jsaStore from './jsa-store'
 
 export const SCRAPERS = [
   // 2026-06-16 連盟サイトリニューアル後の新ソースに対応:
-  //   jsa-event     → /news/?cat=event（旧 /event/ はJS描画になり取れない）
+  //   jsa-event     → /event/ の埋め込み配列 _eventData を解析（正確な開催日つき）
   //   jsa-info      → /news/?cat=taikai（旧 /event/info/ は404廃止）
   //   jsa-tournament→ /event/tournament/（旧 /tournament/ は404）
   { id: 'jsa-event', source: 'jsa' as const, scrape: jsaEvent.scrape },

@@ -6,6 +6,7 @@
 最終更新: 2026-06-16
 
 - ✅ 直近で済んだこと:
+  - **イベント取得(jsa-event)を「正確な開催日つき」に強化**（2026-06-16）: /event/ の埋め込み配列 `_eventData` を fetch→正規表現→JSON.parse で解析する版に作り直し（ブラウザ自動操作なし）。各イベントに正確な開催日(YYYY-MM-DD)が入る。会場は元データに無いので null（推測しない）。/news/view.php を指すイベントは jsa-news と同じ external_id 採番にそろえ、DB(source,external_id)で1行に収れん。テスト6件追加・全130件合格・型/ビルド合格・本番公開済み
   - **連盟サイト復活＋全面リニューアル対応**（2026-06-16）: 連盟スクレイパー3本（jsa-event/info/tournament）が新URL・新HTML構造で壊れていたのを、新ソース（/event/tournament/ と /news/?cat=taikai・/news/?cat=event）に作り直し。共通ニュースパーサ jsa-news.ts を新設。テスト・型・ビルド合格、本番公開済み（詳細は下の「✅ 2026-06-16」節）
   - **本番障害復旧**（2026-05-22）: 共有Supabaseの PostgREST 設定に「存在しないスキーマ `manfune_lab`」が混入していて schema cache 構築が失敗。設定から削除して即復旧（コードは無関係）
 - ✅ 過去に済んだこと:
@@ -62,7 +63,7 @@ DB変更なし、毎日のスクレイピング後に既存データへ自動反
 ## ソースURL（2026-06-16 連盟リニューアル後の実働URL）
 1. https://www.shogi.or.jp/event/tournament/ （jsa-tournament＝大会カテゴリ一覧。静的・cheerioで読める。旧 /tournament/ は404）
 2. https://www.shogi.or.jp/news/?cat=taikai （jsa-info＝大会お知らせ。旧 /event/info/ は404廃止）
-3. https://www.shogi.or.jp/news/?cat=event （jsa-event＝イベントお知らせ。旧 /event/ はJS描画で取れないため移行）
+3. https://www.shogi.or.jp/event/ （jsa-event＝イベントカレンダー。Alpine.js のJS描画だが、描画に使う配列 `_eventData` が静的HTMLの `<script>` に丸ごと埋め込まれているので fetch→正規表現→JSON.parse で取れる＝ブラウザ自動操作不要。**正確な開催日(date=YYYY/MM/DD)つき**。会場は元データに無いので null）
 4. https://store.shogi.or.jp/view/category/tournament （jsa-store＝連盟ストアの大会申し込み。停止中に追加した補完ソース・今も生きているので残置）
 5. https://amaren.la.coocan.jp/
 6. https://amaren.e5.valueserver.jp/Rsys/TournamentListAll.php
@@ -116,7 +117,7 @@ DB変更なし、毎日のスクレイピング後に既存データへ自動反
 - 日本将棋連盟の公式サイト（www.shogi.or.jp）が復活したが、**全面的に作り直され、URLもHTML構造も変わった**ため、旧スクレイパー3本が壊れた。新ソースに作り直して対応済み：
   - `jsa-tournament` → `https://www.shogi.or.jp/event/tournament/`（大会カテゴリ一覧・静的。旧 `/tournament/` は404）。カード(h3=大会名 + p=ひとこと説明)を抽出し、説明文に開催日があれば日付化（例「8月12日に開催」→2026-08-12）。
   - `jsa-info` → `https://www.shogi.or.jp/news/?cat=taikai`（大会お知らせ。旧 `/event/info/` は404廃止）。
-  - `jsa-event` → `https://www.shogi.or.jp/news/?cat=event`（イベントお知らせ。旧 `/event/` はAlpine.jsのJS描画になり fetch+cheerio で取れないため移行）。jsa-info と同じ共通パーサ `lib/scrapers/jsa-news.ts` を共用。
+  - `jsa-event` → `https://www.shogi.or.jp/event/`（イベントカレンダー）。**2026-06-16 さらに強化**＝Alpine.js のJS描画だが、描画用配列 `_eventData` が静的HTMLの `<script>` に丸ごと埋め込まれているので fetch→正規表現 `/_eventData\s*=\s*(\[.*?\]);/s`→JSON.parse で取得（ブラウザ自動操作なし）。各イベントに**正確な開催日(date=YYYY/MM/DD→ISO)**が入る。会場は `_eventData` に無いので null（推測しない）。多くのイベントは `/news/view.php?id=` を指すので、external_id を jsa-news と同じ採番（記事ID基準）にそろえて DB(source,external_id)で1行に収れんさせている。fixture=`tests/fixtures/jsa-event/list.html`（/event/ の実HTML）。
   - `jsa-store`（停止中に追加した補完ソース）は store.shogi.or.jp が今も生きているので残置。
 - fixtures は新HTMLに更新済み（`tests/fixtures/jsa-tournament/index.html`・`tests/fixtures/jsa-news/{taikai,event}.html`）。vitest・tsc・next build すべて合格。
 - 旧 `/event/` はJS描画前提なので、もし将来この一覧をそのまま取りたくなったら Playwright 等が必要（現状はニュース一覧で代替）。
